@@ -7,7 +7,6 @@ from CSV_Load import CSV_Loader
 
 Molecule_DF = CSV_Loader("tested_molecules-1.csv")
 
-
 index_list = []
 for index in range(len(Molecule_DF)):
     if Molecule_DF["ALDH1_inhibition"][index] == 0:
