@@ -47,5 +47,8 @@ df['Super_Significance'] = df['p-value'].apply(lambda p: 'wooooooooooooooooooooo
 df['p-value < 0.05 Count'] = super_significant_count
 
 
-# Save the DataFrame as a CSV file
-df.to_csv('means_table.csv', index=False)
+# Sort the DataFrame based on p-values in ascending order
+df_sorted = df.sort_values(by='p-value')
+
+# Save the sorted DataFrame as a CSV file
+df_sorted.to_csv('ttest_results_sorted.csv', index=False)
