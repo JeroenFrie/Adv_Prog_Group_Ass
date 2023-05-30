@@ -3,7 +3,7 @@ from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
 import pandas as pd
 from CSV_Load import CSV_Loader
-
+from scipy import stats
 
 data = CSV_Loader("tested_molecules-1.csv")
 
@@ -25,6 +25,27 @@ for index in range(len(data)):
 mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
 mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
 
-with open('means.txt', 'w') as file: 
-    file.write('mean_non_inhibitors=' + str(mean_non_inhibitors) + '\n')
-    file.write('mean_inhibitors=' + str(mean_inhibitors) + '\n')
+# Perform t-test per descriptor
+ttest_results = []
+significant_count = 0 
+super_significant_count = 0
+for i, descriptor in enumerate(descriptor_names):
+    non_inhib_values = [desc[i] for desc in non_inhibitor_value]
+    inhib_values = [desc[i] for desc in inhibitor_value]
+    ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
+    ttest_results.append(ttest_result)
+    if ttest_result.pvalue < 0.05:
+        significant_count += 1
+    if ttest_result.pvalue < 0.01:
+        super_significant_count += 1
+
+# Create a DataFrame with the mean values and descriptor names
+df = pd.DataFrame({'Descriptor': descriptor_names, 'mean_non_inhibitors': mean_non_inhibitors, 'mean_inhibitors': mean_inhibitors,'T-Statistic': [result.statistic for result in ttest_results], 'p-value': [result.pvalue for result in ttest_results]})
+df['Significance'] = df['p-value'].apply(lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
+df['p-value < 0.05 Count'] = significant_count
+df['Super_Significance'] = df['p-value'].apply(lambda p: 'woooooooooooooooooooooooooooooooooooooooooooooooow' if p < 0.01 else 'nope')
+df['p-value < 0.05 Count'] = super_significant_count
+
+
+# Save the DataFrame as a CSV file
+df.to_csv('means_table.csv', index=False)
