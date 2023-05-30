@@ -33,7 +33,7 @@ for desc in short_desc:
         temp_list.append(val_desc)
     Molecule_DF[desc] = temp_list
 
-Corr_Mol_Des = Molecule_DF.corr()
+Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
 High_Corr = []
 for row in range(len(Corr_Mol_Des)):
