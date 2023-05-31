@@ -82,3 +82,9 @@ print(len(desc_high_corr))
 
 print(refine_desc_corr)
 print(len(refine_desc_corr))
+
+for name in index_corr_list:
+    if name in refine_desc_corr:
+        Molecule_DF = Molecule_DF.drop(name, axis=1)
+
+print(Molecule_DF)
