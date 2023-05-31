@@ -17,6 +17,7 @@ Mol_list = []
 for row in range(len(Molecule_DF)):
     Mol_list.append(Chem.MolFromSmiles(Molecule_DF["SMILES"][row]))
 
+
 #Rot_bonds = []
 #for MOL in range(len(Mol_list)):
  #   Rot_bonds.append(rdkit.Chem.rdMolDescriptors.CalcNumRotatableBonds((Mol_list[MOL])))
