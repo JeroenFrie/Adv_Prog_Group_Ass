@@ -44,9 +44,41 @@ for row in range(len(Corr_Mol_Des)):
         temp_list.append(Corr_val)
         High_Corr.append(temp_list)
 
-print(High_Corr)
-print(len(High_Corr))
 
+index_corr_list=[]
+for corr_mol in range(len(High_Corr)):
+    row = High_Corr[corr_mol][0]
+    index_corr_list.append(Corr_Mol_Des.iloc[[row]].index[0])
 
+for name in short_desc:
+    if name not in index_corr_list:
+        Molecule_DF = Molecule_DF.drop(name, axis=1)
 
+desc_df = Molecule_DF.iloc[:, 2:len(Molecule_DF.columns)]
+desc_corr_df = desc_df.corr("spearman", numeric_only=True)
 
+desc_high_corr = []
+column_name_list = []
+for column_val in range(len(desc_corr_df.columns)):
+    column_name_list.append(desc_corr_df.columns[column_val])
+    for row in range(len(desc_corr_df)):
+        Corr_val = desc_corr_df.iloc[row, column_val]
+        temp_list = []
+        print(Corr_val)
+        if Corr_val >= 0.9 and Corr_val != 1 and desc_corr_df.iloc[[row]].index[0] not in\
+                column_name_list or Corr_val <= -0.9 and Corr_val != 1 and desc_corr_df.iloc[[row]].index[0] not in\
+                column_name_list:
+            temp_list.append(desc_corr_df.columns[column_val])
+            temp_list.append(desc_corr_df.iloc[[row]].index[0])
+            desc_high_corr.append(temp_list)
+
+refine_desc_corr = []
+for desc_in in range(len(desc_high_corr)):
+    if desc_high_corr[desc_in][0] not in refine_desc_corr:
+        refine_desc_corr.append(desc_high_corr[desc_in][0])
+
+print(desc_high_corr)
+print(len(desc_high_corr))
+
+print(refine_desc_corr)
+print(len(refine_desc_corr))
