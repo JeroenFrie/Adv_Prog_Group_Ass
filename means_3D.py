@@ -4,7 +4,7 @@ Created on Thu Jun  1 14:37:50 2023
 
 @author: 20203129
 """
-# for 2D and 3D
+# for 2D and 3D enzo
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Descriptors3D
 from rdkit.ML.Descriptors import MoleculeDescriptors
@@ -18,8 +18,9 @@ data = CSV_Loader("tested_molecules-1.csv")
 # Create a list of descriptor names
 descriptor_names_3d = ['TPSA', 'Asphericity', 'Eccentricity', 
                        'InertialShapeFactor', 'NPR2', 'PMI1', 'PMI2', 
-                       'PMI3', 'RadiusOfGyration', 'SpherocityIndex' , 'LLE']
+                       'PMI3', 'RadiusOfGyration', 'SpherocityIndex']
 descriptor_names = [desc[0] for desc in Descriptors.descList] + descriptor_names_3d
+
 
 # Create a descriptor calculator 
 calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
@@ -47,7 +48,7 @@ for i, descriptor in enumerate(descriptor_names):
     non_inhib_values = [desc[i] for desc in non_inhibitor_value]
     inhib_values = [desc[i] for desc in inhibitor_value]
     mean_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
-    mean_ttest_results.append(ttest_result)
+    mean_ttest_results.append(mean_ttest_result)
     if mean_ttest_result.pvalue < 0.05:
         significant_count += 1
     if mean_ttest_result.pvalue < 0.01:
