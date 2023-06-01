@@ -21,6 +21,7 @@ num_conformers = 5
 #                        'PMI3', 'RadiusOfGyration', 'SpherocityIndex']
 descriptor_names_3d = ['Asphericity']
 descriptor_names = [desc[0] for desc in Descriptors.descList]
+descriptor_names_all = descriptor_names + descriptor_names_3d
 
 # Create a descriptor calculator 
 calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
@@ -43,10 +44,10 @@ for index in range(len(data)):
             asphericity = Descriptors3D.Asphericity(mol, confId=conf_id)
             asphericities.append(asphericity)
             # Calculate the mean asphericity
-            mean_asphericity = sum(asphericities) / num_conformers
-            driedee_list.append(mean_asphericity)
+        mean_asphericity = sum(asphericities) / num_conformers
+        driedee_list.append(mean_asphericity)
             
-            driedee_tuple = tuple(driedee_list)
+        driedee_tuple = tuple(driedee_list)
         non_inhibitor_value.append(non_inhib_desc_values+driedee_tuple)
     else:
         inhib_desc_values = calc.CalcDescriptors(mol)
@@ -59,11 +60,11 @@ for index in range(len(data)):
             asphericity = Descriptors3D.Asphericity(mol, confId=conf_id)
             asphericities.append(asphericity)
             # Calculate the mean asphericity
-            mean_asphericity = sum(asphericities) / num_conformers
-            driedee_list.append(mean_asphericity)
+        mean_asphericity = sum(asphericities) / num_conformers
+        driedee_list.append(mean_asphericity)
             
-            driedee_tuple = tuple(driedee_list)
-            inhibitor_value.append(inhib_desc_values+driedee_tuple)
+        driedee_tuple = tuple(driedee_list)
+        inhibitor_value.append(inhib_desc_values+driedee_tuple)
         
         
 # for index in range(len(data)):
@@ -89,7 +90,7 @@ mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
 mean_ttest_results = []
 significant_count = 0 
 super_significant_count = 0
-for i, descriptor in enumerate(descriptor_names+descriptor_names_3d):
+for i, descriptor in enumerate(descriptor_names_all):
     non_inhib_values = [desc[i] for desc in non_inhibitor_value]
     inhib_values = [desc[i] for desc in inhibitor_value]
     mean_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
@@ -101,7 +102,7 @@ for i, descriptor in enumerate(descriptor_names+descriptor_names_3d):
 
 # Perform t-test for medians
 median_ttest_results = []
-for i, descriptor in enumerate(descriptor_names):
+for i, descriptor in enumerate(descriptor_names_all):
     non_inhib_values = [desc[i] for desc in non_inhibitor_value]
     inhib_values = [desc[i] for desc in inhibitor_value]
     median_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
@@ -111,7 +112,7 @@ median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
 median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
 
 # Create a DataFrame with the mean, median, and descriptor names
-df = pd.DataFrame({'Descriptor': descriptor_names,
+df = pd.DataFrame({'Descriptor': descriptor_names_all,
                    'mean_non_inhibitors': mean_non_inhibitors,
                    'mean_inhibitors': mean_inhibitors,
                    'median_non_inhibitors': median_non_inhibitors,
