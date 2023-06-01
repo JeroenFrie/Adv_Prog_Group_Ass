@@ -15,78 +15,110 @@ import numpy as np
 
 data = CSV_Loader("tested_molecules-1.csv")
 num_conformers = 5
-# Create a list of descriptor names
-# descriptor_names_3d = ['TPSA', 'Asphericity', 'Eccentricity', 
-#                        'InertialShapeFactor', 'NPR2', 'PMI1', 'PMI2', 
-#                        'PMI3', 'RadiusOfGyration', 'SpherocityIndex']
-descriptor_names_3d = ['Asphericity']
-descriptor_names = [desc[0] for desc in Descriptors.descList]
-descriptor_names_all = descriptor_names + descriptor_names_3d
 
-# Create a descriptor calculator 
-calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
+# Create a list of descriptor names
+descriptor_names_3d = ['asphericities', 'eccentricities', 'inertialShapeFactors',
+                       'NPR1s', 'NPR2s', 'PMI1s', 'PMI2s', 'PMI3s', 
+                       'RadiusOfGyrations', 'SpherocityIndexs']
+descriptor_names_2d = [desc[0] for desc in Descriptors.descList]
+descriptor_names_all = descriptor_names_2d + descriptor_names_3d
+
+# Create a descriptor calculator for 2D
+calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names_2d)
+
+# Descriptor calculator for 3D
+def drieD_descriptors (num_conformers, mol):
+    drieD_list = []
+    # List for every descriptor
+    asphericities = []
+    eccentricities = []
+    inertialShapeFactors = []
+    NPR1s = []
+    NPR2s = []
+    PMI1s =[]
+    PMI2s =[]
+    PMI3s =[]
+    RadiusOfGyrations = []
+    SpherocityIndexs =[]
+    
+    # Iteratate for every conformation
+    for conf_id in range(num_conformers):
+        conf = mol.GetConformer(conf_id)
+        
+        # Calculate value of every descriptor
+        asphericity     = Descriptors3D.Asphericity(mol, confId=conf_id)
+        eccentricity    = Descriptors3D.Eccentricity(mol, confId=conf_id)
+        inertialShapeFactor = Descriptors3D.InertialShapeFactor(mol, confId=conf_id)
+        NPR1 = Descriptors3D.NPR1(mol, confId=conf_id)
+        NPR2 = Descriptors3D.NPR2(mol, confId=conf_id)
+        PMI1 = Descriptors3D.PMI1(mol, confId=conf_id)
+        PMI2 = Descriptors3D.PMI2(mol, confId=conf_id)
+        PMI3 = Descriptors3D.PMI3(mol, confId=conf_id)
+        RadiusOfGyration = Descriptors3D.RadiusOfGyration(mol, confId=conf_id)
+        SpherocityIndex  = Descriptors3D.SpherocityIndex(mol, confId=conf_id)
+        
+        # Add descriptor value to list
+        asphericities.append(asphericity)        
+        eccentricities.append(eccentricity)   
+        inertialShapeFactors.append(inertialShapeFactor)
+        NPR1s.append(NPR1)
+        NPR2s.append(NPR2)
+        PMI1s.append(PMI1)
+        PMI2s.append(PMI2)
+        PMI3s.append(PMI3)
+        RadiusOfGyrations.append(RadiusOfGyration)
+        SpherocityIndexs.append(SpherocityIndex)
+        
+    # Calculate the mean per descriptor for the total number of conformations
+    drieD_descriptors_list = [asphericities, eccentricities, 
+                              inertialShapeFactors, NPR1s, NPR2s, 
+                              PMI1s, PMI2s, PMI3s, RadiusOfGyrations,
+                              SpherocityIndexs ]
+    for descriptor in drieD_descriptors_list:
+        mean = sum(descriptor) / num_conformers
+        drieD_list.append(mean)  
+    return drieD_list
 
 non_inhibitor_value = []
 inhibitor_value =[]
 
+
 for index in range(len(data)):
-    mol = Chem.AddHs(Chem.MolFromSmiles(data["SMILES"][index]))
-    if data["ALDH1_inhibition"][index] == 0:
+    mol = Chem.AddHs(Chem.MolFromSmiles(data["SMILES"][index])) #AddHs adds the hydrogen atoms
+   
+    #non inhibitor;
+    if data["ALDH1_inhibition"][index] == 0:     
         # Make tuple with all 2d descriptors:
         non_inhib_desc_values= calc.CalcDescriptors(mol)
         
         # Calculate 3d descriptors:
         AllChem.EmbedMultipleConfs(mol, num_conformers)
-        driedee_list = []
-        asphericities = []
-        for conf_id in range(num_conformers):
-            conf = mol.GetConformer(conf_id)
-            asphericity = Descriptors3D.Asphericity(mol, confId=conf_id)
-            asphericities.append(asphericity)
-            # Calculate the mean asphericity
-        mean_asphericity = sum(asphericities) / num_conformers
-        driedee_list.append(mean_asphericity)
-            
+        driedee_list = drieD_descriptors (num_conformers, mol)        
+        
+        # Make tuple with all 3d descriptors
         driedee_tuple = tuple(driedee_list)
-        non_inhibitor_value.append(non_inhib_desc_values+driedee_tuple)
+        # Add both tuples to non inhibotor list
+        non_inhibitor_value.append(non_inhib_desc_values + driedee_tuple)
+    
+    #inhibitor
     else:
+        # Make tuple with all 2d descriptors:
         inhib_desc_values = calc.CalcDescriptors(mol)
+        
         # Calculate 3d descriptors:
         AllChem.EmbedMultipleConfs(mol, num_conformers)
-        driedee_list = []
-        asphericities = []
-        for conf_id in range(num_conformers):
-            conf = mol.GetConformer(conf_id)
-            asphericity = Descriptors3D.Asphericity(mol, confId=conf_id)
-            asphericities.append(asphericity)
-            # Calculate the mean asphericity
-        mean_asphericity = sum(asphericities) / num_conformers
-        driedee_list.append(mean_asphericity)
+        driedee_list = drieD_descriptors (num_conformers, mol)  
             
+        # Make tuple with all 3d descriptors
         driedee_tuple = tuple(driedee_list)
-        inhibitor_value.append(inhib_desc_values+driedee_tuple)
-        
-        
-# for index in range(len(data)):
-#     mol = Chem.MolFromSmiles(data["SMILES"][index])
-#     AllChem.EmbedMultipleConfs(mol, num_conformers)
-#     # Calculate the asphericity for each conformer
-#     asphericities = []
-#     for conf_id in range(num_conformers):
-#         conf = mol.GetConformer(conf_id)
-#         asphericity = Descriptors3D.Asphericity(mol, confId=conf_id)
-#         asphericities.append(asphericity)
-#         # Calculate the mean asphericity
-#         mean_asphericity = sum(asphericities) / num_conformers
-#     if data["ALDH1_inhibition"][index] == 0:
-#         non_inhibitor_value.append(mean_asphericity)
-#     else:
-#         inhibitor_value.append(mean_asphericity)
-        
+        # Add both tuples to non inhibotor list
+        inhibitor_value.append(inhib_desc_values + driedee_tuple)
+
+# Calculate mean values        
 mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
 mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
 
-# Perform t-test per descriptor
+# Perform t-test per descriptor for means
 mean_ttest_results = []
 significant_count = 0 
 super_significant_count = 0
@@ -100,16 +132,17 @@ for i, descriptor in enumerate(descriptor_names_all):
     if mean_ttest_result.pvalue < 0.01:
         super_significant_count += 1
 
-# Perform t-test for medians
+# Calculate median values
+median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
+median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
+
+# Perform t-test per descriptor for medians
 median_ttest_results = []
 for i, descriptor in enumerate(descriptor_names_all):
     non_inhib_values = [desc[i] for desc in non_inhibitor_value]
     inhib_values = [desc[i] for desc in inhibitor_value]
     median_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
     median_ttest_results.append(median_ttest_result)
-# Calculate median values
-median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
-median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
 
 # Create a DataFrame with the mean, median, and descriptor names
 df = pd.DataFrame({'Descriptor': descriptor_names_all,
