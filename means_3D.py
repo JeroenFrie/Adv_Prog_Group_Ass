@@ -4,7 +4,6 @@ Created on Thu Jun  1 14:37:50 2023
 
 @author: 20203129
 """
-fhfhfh
 # for 2D and 3D
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Descriptors3D
@@ -19,7 +18,7 @@ data = CSV_Loader("tested_molecules-1.csv")
 # Create a list of descriptor names
 descriptor_names_3d = ['TPSA', 'Asphericity', 'Eccentricity', 
                        'InertialShapeFactor', 'NPR2', 'PMI1', 'PMI2', 
-                       'PMI3', 'RadiusOfGyration', 'SpherocityIndex' ]
+                       'PMI3', 'RadiusOfGyration', 'SpherocityIndex' , 'LLE']
 descriptor_names = [desc[0] for desc in Descriptors.descList] + descriptor_names_3d
 
 # Create a descriptor calculator 
