@@ -5,7 +5,7 @@ from mean import Mean_Median_Desc
 import pandas as pd
 from CSV_Load import CSV_Loader
 
-Molecule_DF = CSV_Loader("tested_molecules-1.csv")
+Molecule_DF = CSV_Loader("tested_molecules_v2.csv")
 DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
 
 def Corr_Calc(Dataframe):
