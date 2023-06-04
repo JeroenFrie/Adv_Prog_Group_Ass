@@ -5,15 +5,17 @@ from mean import Mean_Median_Desc
 import pandas as pd
 from CSV_Load import CSV_Loader
 
-Molecule_DF = CSV_Loader("tested_molecules_v2.csv")
+Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
+pd.to_numeric(Molecule_DF["ALDH1_inhibition"])
 DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
+pd.to_numeric(DrieD_Mol_DF["ALDH1_inhibition"])
 
 def Corr_Calc(Dataframe):
     High_Corr = []
     for row in range(len(Dataframe)):
         temp_list = []
         Corr_val = Dataframe["ALDH1_inhibition"][row]
-        if Corr_val >= 0.1 and Corr_val != 1 or Corr_val <= -0.1 and Corr_val != 1:
+        if Corr_val >= 0.3 and Corr_val != 1 or Corr_val <= -0.3 and Corr_val != 1:
             temp_list.append(row)
             temp_list.append(Corr_val)
             High_Corr.append(temp_list)
@@ -85,30 +87,31 @@ refine_desc_corr = Inter_Corr(desc_corr_df)
 for name in refine_desc_corr:
     Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 
-Desc_lists = Mean_Median_Desc("tested_molecules-1.csv")
-Desc_Mean_list = Desc_lists[0]
-Desc_Median_list = Desc_lists[1]
+#Desc_lists = Mean_Median_Desc("tested_molecules_v3.csv")
 
-Mean_Median_DF = Molecule_DF
-desc_short_list = []
-for name in short_desc:
-    if name not in Desc_Mean_list:
-        Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
-    else:
-        desc_short_list.append(name)
+#Desc_Mean_list = Desc_lists[0]
+#Desc_Median_list = Desc_lists[1]
+
+#Mean_Median_DF = Molecule_DF
+#desc_short_list = []
+#for name in short_desc:
+ #   if name not in Desc_Mean_list:
+  #      Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
+   # else:
+    #    desc_short_list.append(name)
 
 
-desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
-Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
+#desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
+#Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
 
-refine_mean_corr = Inter_Corr(Mean_Median_Corr)
+#refine_mean_corr = Inter_Corr(Mean_Median_Corr)
 
-for name in refine_mean_corr:
-    desc_short_list.remove(name)
+#for name in refine_mean_corr:
+ #   desc_short_list.remove(name)
 
-for name in desc_short_list:
-    if name not in Re_Molecule_DF.columns:
-        Re_Molecule_DF[name] = Mean_Median_DF[name]
+#for name in desc_short_list:
+ #   if name not in Re_Molecule_DF.columns:
+  #      Re_Molecule_DF[name] = Mean_Median_DF[name]
 
 Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
 
@@ -130,4 +133,5 @@ for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
-Re_Molecule_DF.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+#Re_Molecule_DF.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+print(Re_Molecule_DF.columns)
