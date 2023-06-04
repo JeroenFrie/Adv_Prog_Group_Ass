@@ -1,4 +1,3 @@
-# import rdkit.Chem.rdMolDescriptors
 from rdkit.Chem import Descriptors
 from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
@@ -7,6 +6,24 @@ import pandas as pd
 from CSV_Load import CSV_Loader
 
 Molecule_DF = CSV_Loader("tested_molecules-1.csv")
+DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
+
+def Corr_Calc(Dataframe):
+    High_Corr = []
+    for row in range(len(Dataframe)):
+        temp_list = []
+        Corr_val = Dataframe["ALDH1_inhibition"][row]
+        if Corr_val >= 0.1 and Corr_val != 1 or Corr_val <= -0.1 and Corr_val != 1:
+            temp_list.append(row)
+            temp_list.append(Corr_val)
+            High_Corr.append(temp_list)
+
+    index_corr_list = []
+    for corr_mol in range(len(High_Corr)):
+        row = High_Corr[corr_mol][0]
+        index_corr_list.append(Dataframe.iloc[[row]].index[0])
+
+    return index_corr_list
 
 def Inter_Corr(Dataframe):
     desc_high_corr = []
@@ -54,19 +71,7 @@ for desc in short_desc:
 Re_Molecule_DF = Molecule_DF
 Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
-High_Corr = []
-for row in range(len(Corr_Mol_Des)):
-    temp_list = []
-    Corr_val = Corr_Mol_Des["ALDH1_inhibition"][row]
-    if Corr_val >= 0.1 and Corr_val != 1 or Corr_val <= -0.1 and Corr_val != 1:
-        temp_list.append(row)
-        temp_list.append(Corr_val)
-        High_Corr.append(temp_list)
-
-index_corr_list = []
-for corr_mol in range(len(High_Corr)):
-    row = High_Corr[corr_mol][0]
-    index_corr_list.append(Corr_Mol_Des.iloc[[row]].index[0])
+index_corr_list = Corr_Calc(Corr_Mol_Des)
 
 for name in short_desc:
     if name not in index_corr_list:
@@ -105,5 +110,24 @@ for name in desc_short_list:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = Mean_Median_DF[name]
 
+Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
 
-print(Re_Molecule_DF)
+DrieD_corr_index = Corr_Calc(Corr_Drie_D)
+
+for name in DrieD_Mol_DF.columns:
+    if name not in DrieD_corr_index and name != "SMILES" and name != "ALDH1_inhibition":
+        DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
+
+Column_Values = DrieD_Mol_DF.columns
+Pre_Inter_Corr = DrieD_Mol_DF.iloc[:, 2:len(DrieD_Mol_DF.columns)]
+
+Inter_Corr_Val = Inter_Corr(Pre_Inter_Corr)
+for name in Column_Values:
+    if name in Inter_Corr_Val and name != "SMILES" and name != "ALDH1_inhibition":
+        DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
+
+for name in DrieD_Mol_DF.columns:
+    if name not in Re_Molecule_DF.columns:
+        Re_Molecule_DF[name] = DrieD_Mol_DF[name]
+
+Re_Molecule_DF.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
