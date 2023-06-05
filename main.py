@@ -48,13 +48,6 @@ def Inter_Corr(Dataframe):
             refine_mean_corr.append(desc_high_corr[desc_in][0])
     return refine_mean_corr
 
-
-index_list = []
-for index in range(len(Molecule_DF)):
-    if Molecule_DF["ALDH1_inhibition"][index] == 0:
-        index_list.append(index)
-Molecule_DF_In = Molecule_DF.drop(index=index_list)
-
 Mol_list = []
 for row in range(len(Molecule_DF)):
     Mol_list.append(Chem.MolFromSmiles(Molecule_DF["SMILES"][row]))
