@@ -6,6 +6,7 @@ from CSV_Load import CSV_Loader
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
@@ -94,26 +95,24 @@ def Mean_Median_Desc(filepath):
 
     df.to_csv('means_table.csv', index=False)
 
-    fig = plt.figure()
+    # Boxplots for mean
+    # Create a DataFrame with the descriptor values for significant descriptors
+    significant_descriptor_values = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_mean_list})
 
-    # Create boxplots for significant descriptors
-    for i, descriptor in enumerate(super_significant_descriptors_mean_list):
-        mean_non_inhibitors_desc = [desc[i] for desc in non_inhibitor_value for i, d in enumerate(descriptor_names) if d == descriptor]
-        mean_inhibitors_desc = [desc[i] for desc in inhibitor_value for i, d in enumerate(descriptor_names) if d == descriptor]
+    # Create boxplots for the significant descriptors
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(data=significant_descriptor_values)
+    plt.xticks(rotation=90)
+    plt.xlabel('Descriptor')
+    plt.ylabel('Descriptor Value')
+    plt.title('Boxplots for Significant Descriptors')
+    plt.tight_layout()
 
-        # Combine the data
-        data = [mean_non_inhibitors_desc, mean_inhibitors_desc]
+    # Save the boxplots to a file
+    plt.savefig('boxplots_mean.png')
 
-        # Create the boxplot
-        ax = fig.add_subplot(len(significant_descriptors_mean_list), 1, i+1)
-        ax.boxplot(data, labels=['Non-inhibitors', 'Inhibitors'])
-        ax.set_title(descriptor)
-        ax.set_xlabel('Groups')
-        ax.set_ylabel('Descriptor Value')
-    # make file of it
-    fig.tight_layout()
-    fig.savefig('boxplots_mean.png')
-
+    # Write the descriptor values to a CSV file
+    significant_descriptor_values.to_csv('descriptor_values_boxplots.csv', index=False)
 
     return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
     
