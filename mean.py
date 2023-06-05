@@ -5,6 +5,7 @@ import pandas as pd
 from CSV_Load import CSV_Loader
 import numpy as np
 from scipy import stats
+import matplotlib.pyplot as plt
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
@@ -28,29 +29,38 @@ def Mean_Median_Desc(filepath):
     mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
 
     # Perform t-test per descriptor
-    ttest_results = []
-    significant_count = 0
-    super_significant_count = 0
-    for i, descriptor in enumerate(descriptor_names):
-        non_inhib_values = [desc[i] for desc in non_inhibitor_value]
-        inhib_values = [desc[i] for desc in inhibitor_value]
-        ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
-        ttest_results.append(ttest_result)
-        if ttest_result.pvalue < 0.05:
-            significant_count += 1
-        if ttest_result.pvalue < 0.01:
-            super_significant_count += 1
+    ttest_results_mean = []
+    significant_count_mean = 0
+    super_significant_count_mean = 0
 
-    # Perform t-test for medians
-    median_ttest_results = []
     for i, descriptor in enumerate(descriptor_names):
-        non_inhib_values = [desc[i] for desc in non_inhibitor_value]
-        inhib_values = [desc[i] for desc in inhibitor_value]
-        median_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
-        median_ttest_results.append(median_ttest_result)
+        mean_non_inhib = [desc[i] for desc in non_inhibitor_value]
+        mean_inhib_values = [desc[i] for desc in inhibitor_value]
+        ttest_result_mean = stats.ttest_ind(mean_non_inhib, mean_inhib_values)
+        ttest_results_mean.append(ttest_result_mean)
+        if ttest_result_mean.pvalue < 0.05:
+            significant_count_mean += 1
+        if ttest_result_mean.pvalue < 0.01:
+            super_significant_count_mean += 1
+
     # Calculate median values
     median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
     median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
+
+    # Perform t-test for medians
+    ttest_results_median = []
+    significant_count_median = 0
+    super_significant_count_median = 0
+    for i, descriptor in enumerate(descriptor_names):
+        median_non_inhibitors = [desc[i] for desc in non_inhibitor_value]
+        median_inhibitors = [desc[i] for desc in inhibitor_value]
+        median_ttest_result = stats.ttest_ind(median_non_inhibitors, median_inhibitors)
+        ttest_results_median.append(median_ttest_result)
+        if ttest_result_median.pvalue < 0.05:
+            significant_count_median += 1
+        if ttest_result_median.pvalue < 0.01:
+            super_significant_count_median += 1
+
 
     # Create a DataFrame with the mean, median, and descriptor names
     df = pd.DataFrame({'Descriptor': descriptor_names,
@@ -58,20 +68,25 @@ def Mean_Median_Desc(filepath):
                        'mean_inhibitors': mean_inhibitors,
                        'median_non_inhibitors': median_non_inhibitors,
                        'median_inhibitors': median_inhibitors,
-                       'T-Statistic Mean': [result.statistic for result in ttest_results],
-                       'p-value Mean': [result.pvalue for result in ttest_results],
+                       'T-Statistic Mean': [result.statistic for result in ttest_results_mean],
+                       'p-value Mean': [result.pvalue for result in ttest_results_mean],
                        'T-Statistic Median': [result.statistic for result in median_ttest_results],
                        'p-value Median': [result.pvalue for result in median_ttest_results]})
 
     # Add significance columns
     df['Significance Mean'] = df['p-value Mean'].apply(
         lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
-    df['p-value < 0.05 Count'] = significant_count
+    df['p-value < 0.05 Count mean'] = significant_count_mean
     df['Super_Significance Mean'] = df['p-value Mean'].apply(
         lambda p: 'woooooooooooooooooooooooooooooooooooooooooooooooow' if p < 0.01 else 'nope')
-    df['p-value < 0.01 Count'] = super_significant_count
+    df['p-value < 0.01 Count'] = super_significant_count_mean
+
     df['Significance Median'] = df['p-value Median'].apply(
         lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
+    df['p-value < 0.05 Count median'] = significant_count_median
+    df['Super_Significance Median'] = df['p-value Median'].apply(
+        lambda p: 'woooooooooooooooooooooooooooooooooooooooooooooooow' if p < 0.01 else 'nope')
+    df['p-value < 0.01 Count'] = super_significant_count_median
 
     # Lijstjes voor Jeroen:
     super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descriptor'].tolist()
@@ -79,5 +94,26 @@ def Mean_Median_Desc(filepath):
 
     df.to_csv('means_table.csv', index=False)
 
-    return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
+    fig = plt.figure()
 
+    # Create boxplots for significant descriptors
+    for i, descriptor in enumerate(super_significant_descriptors_mean_list):
+        mean_non_inhibitors_desc = [desc[i] for desc in non_inhibitor_value for i, d in enumerate(descriptor_names) if d == descriptor]
+        mean_inhibitors_desc = [desc[i] for desc in inhibitor_value for i, d in enumerate(descriptor_names) if d == descriptor]
+
+        # Combine the data
+        data = [mean_non_inhibitors_desc, mean_inhibitors_desc]
+
+        # Create the boxplot
+        ax = fig.add_subplot(len(significant_descriptors_mean_list), 1, i+1)
+        ax.boxplot(data, labels=['Non-inhibitors', 'Inhibitors'])
+        ax.set_title(descriptor)
+        ax.set_xlabel('Groups')
+        ax.set_ylabel('Descriptor Value')
+    # make file of it
+    fig.tight_layout()
+    fig.savefig('boxplots_mean.png')
+
+
+    return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
+    
