@@ -105,14 +105,32 @@ def Mean_Median_Desc(filepath):
     plt.xticks(rotation=90)
     plt.xlabel('Descriptor')
     plt.ylabel('Descriptor Value')
-    plt.title('Boxplots for Significant Descriptors')
+    plt.title('Boxplots for P<0.01 Mean')
     plt.tight_layout()
 
     # Save the boxplots to a file
     plt.savefig('boxplots_mean.png')
 
     # Write the descriptor values to a CSV file
-    significant_descriptor_values.to_csv('descriptor_values_boxplots.csv', index=False)
+    significant_descriptor_values.to_csv('descriptor_values_boxplots_mean.csv', index=False)
+
+    # Now for the median values
+    significant_descriptor_values_median = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_median_list})
+
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(data=significant_descriptor_values_median)
+    plt.xticks(rotation=90)
+    plt.xlabel('Descriptor')
+    plt.ylabel('Descriptor Value')
+    plt.title('Boxplots for P<0.01 Median')
+    plt.tight_layout()
+
+    # Save the boxplots to a file
+    plt.savefig('boxplots_median.png')
+
+    # Write the descriptor values to a CSV file
+    significant_descriptor_values.to_csv('descriptor_values_boxplots_median.csv', index=False)
+
 
     return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
     
