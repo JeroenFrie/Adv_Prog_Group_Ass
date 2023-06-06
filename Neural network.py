@@ -70,5 +70,14 @@ print("Balanced Accuracy:", balanced_acc)
 #ToDo do not use accuracy, used balanced accuracy and sensitivity instead
 #ToDo try random forest
 
-#%%
+#%% Random Forest
+from sklearn.ensemble import RandomForestClassifier
+
+rf_model = RandomForestClassifier(n_estimators=400)
+rf_model.fit(X_train, y_train)
+rf_predictions = rf_model.predict(X_test)
+balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
+print("Balanced Accuracy:", balanced_acc)
+
+
 
