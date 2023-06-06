@@ -1,10 +1,10 @@
-from rdkit.Chem import Descriptors
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
-import pandas as pd
 from CSV_Load import CSV_Loader
-import numpy as np
 from scipy import stats
+import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -29,7 +29,7 @@ def Mean_Median_Desc(filepath):
     mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
     mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
 
-    # Perform t-test per descriptor
+    # Perform t-test per descriptor for means
     ttest_results_mean = []
     significant_count_mean = 0
     super_significant_count_mean = 0
@@ -48,7 +48,7 @@ def Mean_Median_Desc(filepath):
     median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
     median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
 
-    # Perform t-test for medians
+    # Perform t-test per descriptor for medians
     ttest_results_median = []
     significant_count_median = 0
     super_significant_count_median = 0
