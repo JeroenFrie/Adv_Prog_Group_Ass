@@ -4,7 +4,7 @@ Created on Thu Jun  1 14:37:50 2023
 
 @author: 20203129
 """
-# for 2D and 3D enzo
+# for 2D and 3D
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Descriptors3D, AllChem
 from rdkit.ML.Descriptors import MoleculeDescriptors
