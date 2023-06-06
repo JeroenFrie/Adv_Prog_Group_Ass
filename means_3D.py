@@ -13,7 +13,6 @@ from scipy import stats
 import pandas as pd
 import numpy as np
 import time 
-start = time.perf_counter()
 
 # Descriptor calculator for 3D
 def drieD_descriptors (num_conformers, mol):
@@ -70,7 +69,7 @@ def drieD_descriptors (num_conformers, mol):
 
 def Mean_median_desc(filepath):
     data = CSV_Loader(filepath)
-    num_conformers = 2
+    num_conformers = 20
     
     # Create a list of descriptor names
     descriptor_names_3d = ['asphericities', 'eccentricities', 'inertialShapeFactors',
@@ -183,6 +182,3 @@ def Mean_median_desc(filepath):
     df.to_csv('means_table_3D.csv', index=False)
 
 Mean_median_desc('tested_molecules-1.csv')
-final = time.perf_counter()
-
-print(final - start)
