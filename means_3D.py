@@ -12,7 +12,6 @@ from CSV_Load import CSV_Loader
 from scipy import stats
 import pandas as pd
 import numpy as np
-import time 
 
 # Descriptor calculator for 3D
 def drieD_descriptors (num_conformers, mol):
@@ -124,39 +123,40 @@ def Mean_median_desc(filepath):
     mean_non_inhibitors_list = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
     mean_inhibitors_list = [sum(col) / len(col) for col in zip(*inhibitor_value)]
     
+    # Calculate median values
+    median_non_inhibitors_list = [np.median(col) for col in zip(*non_inhibitor_value)]
+    median_inhibitors_list = [np.median(col) for col in zip(*inhibitor_value)]
+    
     # Perform t-test per descriptor for means
     ttest_results_mean = []
     significant_count_mean = 0 
     super_significant_count_mean = 0
-   
-    for i, descriptor in enumerate(descriptor_names_all):
-        mean_non_inhib = [desc[i] for desc in non_inhibitor_value]
-        mean_inhib_values = [desc[i] for desc in inhibitor_value]
-        ttest_result_mean = stats.ttest_ind(mean_non_inhib, mean_inhib_values)
-        ttest_results_mean.append(ttest_result_mean)
-        if ttest_result_mean.pvalue < 0.05:
-            significant_count_mean += 1
-        if ttest_result_mean.pvalue < 0.01:
-            super_significant_count_mean += 1
-
-   # Calculate median values
-    median_non_inhibitors_list = [np.median(col) for col in zip(*non_inhibitor_value)]
-    median_inhibitors_list = [np.median(col) for col in zip(*inhibitor_value)]
-
+    
     # Perform t-test per descriptor for medians
     ttest_results_median = []
     significant_count_median = 0
     super_significant_count_median = 0
-    
+   
     for i, descriptor in enumerate(descriptor_names_all):
-       median_non_inhibitors = [desc[i] for desc in non_inhibitor_value]
-       median_inhibitors = [desc[i] for desc in inhibitor_value]
-       ttest_result_median = stats.ttest_ind(median_non_inhibitors, median_inhibitors)
-       ttest_results_median.append(ttest_result_median)
-       if ttest_result_median.pvalue < 0.05:
-           significant_count_median += 1
-       if ttest_result_median.pvalue < 0.01:
-           super_significant_count_median += 1
+        mean_non_inhibitors = [desc[i] for desc in non_inhibitor_value]
+        mean_inhibitors = [desc[i] for desc in inhibitor_value]
+        median_non_inhibitors = [desc[i] for desc in non_inhibitor_value]
+        median_inhibitors = [desc[i] for desc in inhibitor_value]
+        
+        ttest_result_mean = stats.ttest_ind(mean_non_inhibitors, mean_inhibitors)
+        ttest_result_median = stats.ttest_ind(median_non_inhibitors, median_inhibitors)
+        
+        ttest_results_mean.append(ttest_result_mean)
+        ttest_results_median.append(ttest_result_median)
+       
+        if ttest_result_mean.pvalue < 0.05:
+            significant_count_mean += 1
+        if ttest_result_mean.pvalue < 0.01:
+            super_significant_count_mean += 1
+        if ttest_result_median.pvalue < 0.05:
+            significant_count_median += 1
+        if ttest_result_median.pvalue < 0.01:
+            super_significant_count_median += 1         
     
     # Create a DataFrame with the mean, median, and descriptor names
     df = pd.DataFrame({'Descriptor': descriptor_names_all,
