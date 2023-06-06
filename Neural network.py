@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jun  6 00:22:17 2023
+
+@author: 20201969
+"""
+
 """
 In this file the possible neural networks are listed we can use for 
             determining whether a inhibitor actually inhibits ALDH1
@@ -64,11 +71,9 @@ balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
 print("Balanced Accuracy:", balanced_acc)
 
 
-#ToDo comparative method for true value and predicted value (RMES)
-#ToDo retrain on all the data
-
-#ToDo do not use accuracy, used balanced accuracy and sensitivity instead
-#ToDo try random forest
+#TODO comparative method for true value and predicted value (RMES)
+#TODO retrain on all the data
+#TODO use sensitivity also
 
 #%% Random Forest
 from sklearn.ensemble import RandomForestClassifier
@@ -78,6 +83,4 @@ rf_model.fit(X_train, y_train)
 rf_predictions = rf_model.predict(X_test)
 balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
 print("Balanced Accuracy:", balanced_acc)
-
-
 
