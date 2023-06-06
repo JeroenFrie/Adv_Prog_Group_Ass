@@ -4,6 +4,9 @@ from rdkit.ML.Descriptors import MoleculeDescriptors
 from mean import Mean_Median_Desc
 import pandas as pd
 from CSV_Load import CSV_Loader
+import sklearn.preprocessing as sp
+from sklearn import decomposition, linear_model
+
 
 Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
 pd.to_numeric(Molecule_DF["ALDH1_inhibition"])
@@ -126,5 +129,19 @@ for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
-#Re_Molecule_DF.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
-print(Re_Molecule_DF.columns)
+scaler_type = sp.StandardScaler()
+scale_data_df = Re_Molecule_DF
+scale_data_df = scale_data_df.drop("SMILES", axis=1)
+scale_data_df = scale_data_df.drop("ALDH1_inhibition", axis=1)
+scaler_type.fit(scale_data_df)
+scaled_data = scaler_type.transform(scale_data_df)
+
+standard_scaled = pd.DataFrame(scaled_data, columns=scale_data_df.columns)
+
+standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"])
+standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
+
+standard_scaled.set_index("SMILES")
+
+standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+print(standard_scaled)
