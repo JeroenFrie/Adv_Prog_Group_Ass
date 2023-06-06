@@ -9,9 +9,9 @@ from sklearn import decomposition, linear_model
 
 
 Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
-pd.to_numeric(Molecule_DF["ALDH1_inhibition"])
+
 DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
-pd.to_numeric(DrieD_Mol_DF["ALDH1_inhibition"])
+
 
 def Corr_Calc(Dataframe):
     High_Corr = []
