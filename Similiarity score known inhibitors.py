@@ -211,11 +211,11 @@ mol_non_inh = mol_data[mol_data["ALDH1_inhibition"] == 0]
 # of reference inhibitors are stored, divided for the inhibitors and 
 # non-inhibitors
 mean_median_similarity= pd.DataFrame(columns= 
-                                     ["molecular desciptor", "mean_inh", 
+                                     ["SMILES", "mean_inh", 
                                       "mean_non_inh", "median_inh", 
                                       "median_non_inh"])
 for i in range(len(Smiles_ref_inhibitor_insig_removed)):
-        mean_median_similarity.loc[str(i)] = ["Sim_inh"+str(i), 
+        mean_median_similarity.loc[str(i)] = [Smiles_ref_inhibitor_insig_removed[i], 
                                               mol_inh["Sim_inh"+str(i)].mean(), 
                                                mol_non_inh["Sim_inh"+str(i)].mean(),
                                                mol_inh["Sim_inh"+str(i)].median(),
