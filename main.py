@@ -141,7 +141,6 @@ standard_scaled = pd.DataFrame(scaled_data, columns=scale_data_df.columns)
 standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"])
 standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
 
-standard_scaled.set_index("SMILES")
+#standard_scaled.set_index("SMILES")
 
 standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
-print(standard_scaled)
