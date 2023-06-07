@@ -5,8 +5,8 @@ from CSV_Load import CSV_Loader
 from scipy import stats
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
@@ -38,7 +38,7 @@ def Mean_Median_Desc(filepath):
         non_inhibitor = [desc[i] for desc in non_inhibitor_value]
         inhib_values = [desc[i] for desc in inhibitor_value]
         ttest_result = stats.ttest_ind(non_inhibitor, inhib_values)
-        ttest_results.append(ttest_result_mean)
+        ttest_results.append(ttest_result)
         if ttest_result.pvalue < 0.05:
             significant_count += 1
         if ttest_result.pvalue < 0.01:
@@ -68,8 +68,8 @@ def Mean_Median_Desc(filepath):
 
 
     # Lijstjes voor Jeroen:
-    super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descriptor'].tolist()
-    super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Descriptor'].tolist()
+    super_significant_descriptors_mean_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
+    super_significant_descriptors_median_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
 
     df.to_csv('means_table.csv', index=False)
 
@@ -112,3 +112,4 @@ def Mean_Median_Desc(filepath):
 
     return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
     
+Mean_Median_Desc('tested_molecules-1.csv')
