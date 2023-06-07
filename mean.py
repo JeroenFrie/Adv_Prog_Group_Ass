@@ -60,10 +60,10 @@ def Mean_Median_Desc(filepath):
                         })
     # Add significance columns
     df['Significance'] = df['p-value'].apply(
-        lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
+        lambda p: 'goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
     df['p-value < 0.05 Count'] = significant_count
     df['Super_Significance'] = df['p-value'].apply(
-        lambda p: 'woooooooooooooooooooooooooooooooooooooooooooooooow' if p < 0.01 else 'nope')
+        lambda p: 'woow' if p < 0.01 else 'nope')
     df['p-value < 0.01 Count'] = super_significant_count
 
 
@@ -71,11 +71,11 @@ def Mean_Median_Desc(filepath):
     super_significant_descriptors_mean_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
     super_significant_descriptors_median_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
 
-    df.to_csv('means_table.csv', index=False)
+    df.to_csv('means_median_stat_table.csv', index=False)
 
     # Boxplots for mean
     # Create a DataFrame with the descriptor values for significant descriptors
-    significant_descriptor_values = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_mean_list})
+   # significant_descriptor_values = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_mean_list})
 
     # Create boxplots for the significant descriptors
  #   plt.figure(figsize=(12, 6))
