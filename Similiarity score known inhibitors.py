@@ -5,6 +5,7 @@ from rdkit.Chem.Draw import IPythonConsole
 import pandas as pd
 from rdkit.Chem import PandasTools, DataStructs, MACCSkeys
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 # Sim_inh0: "CN(C)C1=CC=C(C=C1)C=O": p-Dimethylaminobenzaldehyde hydrobromide    
 # Source for inhibitor: https://pubmed.ncbi.nlm.nih.gov/25512087/
@@ -24,8 +25,7 @@ import matplotlib.pyplot as plt
 # Source for inhibitor: https://europepmc.org/article/pmc/5185321
 
 # List which contains the SMILES of the reference inhibitors 
-Smiles_ref_inhibitor = ["CN(C)C1=CC=C(C=C1)C=O", 
-                         "O=C1C=C2NCCC2=CC1=O", "CC1=CC2=C(C=C1)NC(=O)C2=O", 
+Smiles_ref_inhibitor = ["CN(C)C1=CC=C(C=C1)C=O", "O=C1C=C2NCCC2=CC1=O", "CC1=CC2=C(C=C1)NC(=O)C2=O", 
                          "C=CC(=O)C1=CC2=CC=CC=C2C=C1", 
                          "CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3CCN(CC3)C(=O)"
                          +"C4CC4"]
@@ -85,13 +85,141 @@ for nr_ref in range(len(reference_inhibitor_fps)):
     # Add the tanimoto list to a new column in the mol_data data frame
     mol_data["Sim_inh"+str(nr_ref)] = tanimoto
 
-# For exploratory data analysis purposes, plot boxplots for the 
-# similarity scores  the test inhibitors and each
-# reference ALDH1 inhibitor
-mol_data.boxplot(column=["Sim_inh0"], by='ALDH1_inhibition')
-mol_data.boxplot(column=["Sim_inh1"], by='ALDH1_inhibition')
-mol_data.boxplot(column=["Sim_inh2"], by='ALDH1_inhibition')
-mol_data.boxplot(column=["Sim_inh3"], by='ALDH1_inhibition')
-mol_data.boxplot(column=["Sim_inh4"], by='ALDH1_inhibition')
-plt.show()
 
+# # For exploratory data analysis purposes, plot boxplots for the 
+# # similarity scores  the test inhibitors and each
+# # reference ALDH1 inhibitor
+# mol_data.boxplot(column=["Sim_inh0"], by='ALDH1_inhibition')
+# mol_data.boxplot(column=["Sim_inh1"], by='ALDH1_inhibition')
+# mol_data.boxplot(column=["Sim_inh2"], by='ALDH1_inhibition')
+# mol_data.boxplot(column=["Sim_inh3"], by='ALDH1_inhibition')
+# mol_data.boxplot(column=["Sim_inh4"], by='ALDH1_inhibition')
+# plt.show()
+
+def t_test(df: pd.DataFrame, numeric_var: str, categoric_var: str) -> list :
+    """ Perform a t-test for two dataframes that have one numeric and one 
+    categorical variable. The t-test will determine if the difference of the 
+    numerical data of the categorical groups is significant. 
+    
+    parameters:
+        df: dataframe with the two columns, one for the numeric variable and the
+            other for the categorical varable
+        numeric_var: columnname of the numeric variable
+        categoric_var: columnname of the categoric variable
+        
+    returns:
+        ttest_simularity: dataframe in which contains the name of the reference 
+            inhibitor (molecular descriptor), the t-test value and the p-value
+    """
+    # Create dataframes for which only include either the inhibitors or the 
+    # non-inhibitors
+    df_inh = df[df[categoric_var]== 1]
+    df_non_inh = df[df[categoric_var]== 0]
+    # Test whether the groups of the inhibitors and non-inhibitors have equal
+    # variances, since this is a parameter that is important for the t-test
+    variance_equal_test = stats.levene(df_inh[numeric_var], 
+                                       df_non_inh[numeric_var], center='median')
+    # In case the p value is smaller than 0.05, the variance can assumed to be
+    # equal
+    if variance_equal_test[1] < 0.05:
+        ttest_simularity = stats.ttest_ind(df_inh[numeric_var], 
+                                           df_non_inh[numeric_var], 
+                                           equal_var= True)
+        return([ttest_simularity[0], ttest_simularity[1]])
+    # In case the p value is greater or equal than 0.05, the variance is not
+    # assumed to be equal
+    elif variance_equal_test[1] >= 0.05:
+        ttest_simularity = stats.ttest_ind(df_inh[numeric_var], 
+                                           df_non_inh[numeric_var], 
+                                           equal_var= False)
+        return([ttest_simularity[0], ttest_simularity[1]])
+
+def moods_median_test(df: pd.DataFrame, numeric_var: str,
+                       categoric_var: str) -> list :
+    """ Perform a t-test for two dataframes that have one numeric and one 
+    categorical variable. The t-test will determine if the difference of the 
+    numerical data of the categorical groups is significant. 
+    
+    parameters:
+        df: dataframe with the two columns, one for the numeric variable and the
+            other for the categorical varable
+        numeric_var: columnname of the numeric variable
+        categoric_var: columnname of the categoric variable
+        
+    returns:
+        statistic: the mood statistic for the median
+        p_value: p value for the mood statistic for the median
+    """
+    # Create dataframes for which only include either the inhibitors or the 
+    # non-inhibitors
+    df_inh = df[df[categoric_var]== 1]
+    df_non_inh = df[df[categoric_var]== 0]
+    # Conduct the moods test for calculating if the difference in significancy
+    statistic, p_value, median, table= stats.median_test(df_inh[numeric_var],
+                                                          df_non_inh[numeric_var])
+    return([statistic, p_value])
+
+
+# Create an empty dataframe in which the statistics of the t-test and mood test
+# will be stored later
+ttest_moods_statistics= pd.DataFrame(columns= ["molecular descriptor", "SMILES",
+                                         "t-test score", "p-value t-test",
+                                           "significant t-test", 
+                                           "moods score", 
+                                           "p-value mood",
+                                           "significant mood"])
+
+for i in range(len(Smiles_ref_inhibitor)):
+    # Select only the columns needed for calculating the statistics for 
+    # the specific reference inhibitor
+    mol_data_select = mol_data[["ALDH1_inhibition", "Sim_inh"+str(i)]].copy()
+    # Change the type of the values in the column "ALDH1_inhibition" to strings
+    mol_data_select["ALDH1_inhibition"].apply(str)
+    # Perform the t-test and mood test for all reference inhibitors
+    results_t_test= t_test(mol_data_select, "Sim_inh"+str(i),
+                            "ALDH1_inhibition")
+    results_moods_test = moods_median_test(mol_data_select, "Sim_inh"+str(i),
+                            "ALDH1_inhibition")
+    # Add the statistics of the tests to the dataframe that was created above 
+    # the for-loop
+    ttest_moods_statistics.loc[str(i)] = ["Sim_inh"+str(i), 
+                                          Smiles_ref_inhibitor[i],
+                                     results_t_test[0], results_t_test[1],
+                                       results_t_test[1] < 0.01, 
+                                       results_moods_test[0], 
+                                       results_moods_test[1], 
+                                       results_moods_test[1] < 0.01]
+print(ttest_moods_statistics.head())
+# Save dataframe to csv file
+ttest_moods_statistics.to_csv("ttest_moods_statistics_similarity.csv")
+
+
+
+# Only Sim_inh3 had insignificant differences in the ttest and moods test for
+# the median, for the other reference inhibitors a mean, median dataframe is 
+# created
+Smiles_ref_inhibitor_insig_removed = ["CN(C)C1=CC=C(C=C1)C=O", 
+                                      "O=C1C=C2NCCC2=CC1=O", 
+                                      "CC1=CC2=C(C=C1)NC(=O)C2=O",
+                                      "CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3"+
+                                      "CCN(CC3)C(=O)C4CC4"]
+
+# Create separate dataframes for the inhibitors and non-inhibitors data
+mol_inh = mol_data[mol_data["ALDH1_inhibition"] == 1]
+mol_non_inh = mol_data[mol_data["ALDH1_inhibition"] == 0]
+# Create a dataframe in which the means and medians of the similarity score
+# of reference inhibitors are stored, divided for the inhibitors and 
+# non-inhibitors
+mean_median_similarity= pd.DataFrame(columns= 
+                                     ["SMILES", "mean_inh", 
+                                      "mean_non_inh", "median_inh", 
+                                      "median_non_inh"])
+for i in range(len(Smiles_ref_inhibitor_insig_removed)):
+        mean_median_similarity.loc[str(i)] = [Smiles_ref_inhibitor_insig_removed[i], 
+                                              mol_inh["Sim_inh"+str(i)].mean(), 
+                                               mol_non_inh["Sim_inh"+str(i)].mean(),
+                                               mol_inh["Sim_inh"+str(i)].median(),
+                                               mol_non_inh["Sim_inh"+str(i)].median()]
+print(mean_median_similarity)
+# Save dataframe to csv file
+mean_median_similarity.to_csv("mean_median_similarity.csv")
