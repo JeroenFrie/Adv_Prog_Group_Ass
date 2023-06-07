@@ -73,6 +73,11 @@ def Mean_Median_Desc(filepath):
 
     df.to_csv('means_median_stat_table.csv', index=False)
 
+    # make second table with only the descriptors with significant difference 
+    df2 = df [df['p-value']<0.01]
+    df2 = df[['Descriptor', 'mean_non_inhibitors','mean_inhibitors', 'median_non_inhibitors', 'median_inhibitors', 'p-value',]]
+    df2.to_csv('descriptors_low_Pvalue.csv', index=False)
+
     # Boxplots for mean
     # Create a DataFrame with the descriptor values for significant descriptors
    # significant_descriptor_values = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_mean_list})
