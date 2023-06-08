@@ -9,11 +9,6 @@ import numpy as np
 #import matplotlib.pyplot as plt
 #import seaborn as sns
 
-def remove_outliers_zscore (data, threshold=3):
-     z_scores = stats.zscore(data)
-     outliers = np.abs(z_scores) > threshold
-     clean_data = data [outliers == False]
-     return clean_data
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
