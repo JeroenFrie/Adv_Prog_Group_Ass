@@ -101,7 +101,7 @@ def Mean_Median_Desc(filepath):
     super_significant_descriptors_mean_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
     super_significant_descriptors_median_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
 
-    df.to_csv('means_median_stat_table2.csv', index=False)
+    df.to_csv('means_median_stat_table.csv', index=False)
 
     # make second table with only the descriptors with significant difference 
     df2 = df [df['p-value']<0.01]

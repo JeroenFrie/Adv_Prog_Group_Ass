@@ -81,8 +81,8 @@ def Mean_median_desc(filepath):
     calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names_2d)
     
     # Create list of the non-inhibitors and inhibitors
-    non_inhibitor_value = []
-    inhibitor_value =[]
+    non_inhibitor_values = []
+    inhibitor_values =[]
     
     
     for index in range(len(data)):
@@ -102,7 +102,7 @@ def Mean_median_desc(filepath):
             driedee_tuple = tuple(driedee_list)
             
             # Add both tuples to non inhibotor list
-            non_inhibitor_value.append(non_inhib_desc_values + driedee_tuple)
+            non_inhibitor_values.append(non_inhib_desc_values + driedee_tuple)
         
         # Inhibitor
         else:
@@ -117,16 +117,32 @@ def Mean_median_desc(filepath):
             driedee_tuple = tuple(driedee_list)
             
             # Add both tuples to non inhibotor list
-            inhibitor_value.append(inhib_desc_values + driedee_tuple)
+            inhibitor_values.append(inhib_desc_values + driedee_tuple)
     
-    # Calculate mean values        
-    mean_non_inhibitors_list = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
-    mean_inhibitors_list = [sum(col) / len(col) for col in zip(*inhibitor_value)]
-    
-    # Calculate median values
-    median_non_inhibitors_list = [np.median(col) for col in zip(*non_inhibitor_value)]
-    median_inhibitors_list = [np.median(col) for col in zip(*inhibitor_value)]
-    
+    # Convert the lists of descriptor values to NumPy arrays
+    non_inhibitor_values = np.array(non_inhibitor_values)
+    inhibitor_values = np.array(inhibitor_values)
+   
+    # Calculate the z-scores for the molecules
+    non_inhibitor_z_scores = stats.zscore(non_inhibitor_values, axis=0)
+    inhibitor_z_scores = stats.zscore(inhibitor_values, axis=0)
+   
+    # Identify outlier molecules based on a threshold
+    threshold = 3
+    non_inhibitor_outliers = np.abs(non_inhibitor_z_scores) > threshold
+    inhibitor_outliers = np.abs(inhibitor_z_scores) > threshold
+     
+    # Replace outliers with 'nan'
+    non_inhibitor_values[non_inhibitor_outliers] = np.nan
+    inhibitor_values[inhibitor_outliers] = np.nan
+
+    # Calculate the mean
+    mean_non_inhibitors = np.nanmean(non_inhibitor_values, axis = 0)
+    mean_inhibitors = np.nanmean(inhibitor_values, axis = 0)
+   
+    # Calculate median 
+    median_non_inhibitors = np.nanmedian(non_inhibitor_values, axis =0)
+    median_inhibitors = np.nanmedian(inhibitor_values, axis = 0)
     
     # Perform t-test per descriptor
     ttest_results= []
@@ -134,21 +150,26 @@ def Mean_median_desc(filepath):
     super_significant_count = 0
    
     for i, descriptor in enumerate(descriptor_names_all):
-       non_inhibitor = [desc[i] for desc in non_inhibitor_value]
-       inhib_values = [desc[i] for desc in inhibitor_value]
-       ttest_result = stats.ttest_ind(non_inhibitor, inhib_values)
-       ttest_results.append(ttest_result)
-       if ttest_result.pvalue < 0.05:
-           significant_count += 1
-       if ttest_result.pvalue < 0.01:
-           super_significant_count += 1       
-    
+        non_inhibitor = non_inhibitor_values [:,i]
+        inhibitor = inhibitor_values [:,i]
+        
+        #remove 'nan' values 
+        non_inhibitor_clean = non_inhibitor [~ np.isnan(non_inhibitor)]
+        inhibitor_clean = inhibitor [~ np.isnan(inhibitor)]
+        
+        ttest_result = stats.ttest_ind(non_inhibitor_clean, inhibitor_clean)
+        ttest_results.append(ttest_result)
+        if ttest_result.pvalue < 0.05:
+            significant_count += 1
+        if ttest_result.pvalue < 0.01:
+            super_significant_count += 1
+            
     # Create a DataFrame with the mean, median, and descriptor names
     df = pd.DataFrame({'Descriptor': descriptor_names_all,
-                     'mean_non_inhibitors': mean_non_inhibitors_list,
-                     'mean_inhibitors': mean_inhibitors_list,
-                     'median_non_inhibitors': median_non_inhibitors_list,
-                     'median_inhibitors': median_inhibitors_list,
+                     'mean_non_inhibitors': mean_non_inhibitors,
+                     'mean_inhibitors': mean_inhibitors,
+                     'median_non_inhibitors': median_non_inhibitors,
+                     'median_inhibitors': median_inhibitors,
                      'T-Statistic': [result.statistic for result in ttest_results],
                      'p-value': [result.pvalue for result in ttest_results],
                       })
@@ -161,10 +182,10 @@ def Mean_median_desc(filepath):
     df['p-value < 0.01 Count'] = super_significant_count
     
     # Lijstjes voor Jeroen:
-    super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descriptor'].tolist()
-    super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Descriptor'].tolist()
+    super_significant_descriptors_mean_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
+    super_significant_descriptors_median_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
     
-    df.to_csv('means_median_stat_table_3D.csv', index=False)
+    df.to_csv('means_median_stat_table_3D_2.csv', index=False)
     
     # make second table with only the descriptors with significant difference 
     df2 = df [df['p-value']<0.01]
