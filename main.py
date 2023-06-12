@@ -1,12 +1,34 @@
-# import rdkit.Chem.rdMolDescriptors
 from rdkit.Chem import Descriptors
 from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from mean import Mean_Median_Desc
 import pandas as pd
 from CSV_Load import CSV_Loader
+import sklearn.preprocessing as sp
+from sklearn import decomposition, linear_model
 
-Molecule_DF = CSV_Loader("tested_molecules-1.csv")
+
+Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
+
+DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
+
+
+def Corr_Calc(Dataframe):
+    High_Corr = []
+    for row in range(len(Dataframe)):
+        temp_list = []
+        Corr_val = Dataframe["ALDH1_inhibition"][row]
+        if Corr_val >= 0.3 and Corr_val != 1 or Corr_val <= -0.3 and Corr_val != 1:
+            temp_list.append(row)
+            temp_list.append(Corr_val)
+            High_Corr.append(temp_list)
+
+    index_corr_list = []
+    for corr_mol in range(len(High_Corr)):
+        row = High_Corr[corr_mol][0]
+        index_corr_list.append(Dataframe.iloc[[row]].index[0])
+
+    return index_corr_list
 
 def Inter_Corr(Dataframe):
     desc_high_corr = []
@@ -29,13 +51,6 @@ def Inter_Corr(Dataframe):
             refine_mean_corr.append(desc_high_corr[desc_in][0])
     return refine_mean_corr
 
-
-index_list = []
-for index in range(len(Molecule_DF)):
-    if Molecule_DF["ALDH1_inhibition"][index] == 0:
-        index_list.append(index)
-Molecule_DF_In = Molecule_DF.drop(index=index_list)
-
 Mol_list = []
 for row in range(len(Molecule_DF)):
     Mol_list.append(Chem.MolFromSmiles(Molecule_DF["SMILES"][row]))
@@ -54,19 +69,7 @@ for desc in short_desc:
 Re_Molecule_DF = Molecule_DF
 Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
-High_Corr = []
-for row in range(len(Corr_Mol_Des)):
-    temp_list = []
-    Corr_val = Corr_Mol_Des["ALDH1_inhibition"][row]
-    if Corr_val >= 0.1 and Corr_val != 1 or Corr_val <= -0.1 and Corr_val != 1:
-        temp_list.append(row)
-        temp_list.append(Corr_val)
-        High_Corr.append(temp_list)
-
-index_corr_list = []
-for corr_mol in range(len(High_Corr)):
-    row = High_Corr[corr_mol][0]
-    index_corr_list.append(Corr_Mol_Des.iloc[[row]].index[0])
+index_corr_list = Corr_Calc(Corr_Mol_Des)
 
 for name in short_desc:
     if name not in index_corr_list:
@@ -80,30 +83,64 @@ refine_desc_corr = Inter_Corr(desc_corr_df)
 for name in refine_desc_corr:
     Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 
-Desc_lists = Mean_Median_Desc("tested_molecules-1.csv")
-Desc_Mean_list = Desc_lists[0]
-Desc_Median_list = Desc_lists[1]
+#Desc_lists = Mean_Median_Desc("tested_molecules_v3.csv")
 
-Mean_Median_DF = Molecule_DF
-desc_short_list = []
-for name in short_desc:
-    if name not in Desc_Mean_list:
-        Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
-    else:
-        desc_short_list.append(name)
+#Desc_Mean_list = Desc_lists[0]
+#Desc_Median_list = Desc_lists[1]
+
+#Mean_Median_DF = Molecule_DF
+#desc_short_list = []
+#for name in short_desc:
+ #   if name not in Desc_Mean_list:
+  #      Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
+   # else:
+    #    desc_short_list.append(name)
 
 
-desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
-Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
+#desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
+#Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
 
-refine_mean_corr = Inter_Corr(Mean_Median_Corr)
+#refine_mean_corr = Inter_Corr(Mean_Median_Corr)
 
-for name in refine_mean_corr:
-    desc_short_list.remove(name)
+#for name in refine_mean_corr:
+ #   desc_short_list.remove(name)
 
-for name in desc_short_list:
+#for name in desc_short_list:
+ #   if name not in Re_Molecule_DF.columns:
+  #      Re_Molecule_DF[name] = Mean_Median_DF[name]
+
+Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
+
+DrieD_corr_index = Corr_Calc(Corr_Drie_D)
+
+for name in DrieD_Mol_DF.columns:
+    if name not in DrieD_corr_index and name != "SMILES" and name != "ALDH1_inhibition":
+        DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
+
+Column_Values = DrieD_Mol_DF.columns
+Pre_Inter_Corr = DrieD_Mol_DF.iloc[:, 2:len(DrieD_Mol_DF.columns)]
+
+Inter_Corr_Val = Inter_Corr(Pre_Inter_Corr)
+for name in Column_Values:
+    if name in Inter_Corr_Val and name != "SMILES" and name != "ALDH1_inhibition":
+        DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
+
+for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
-        Re_Molecule_DF[name] = Mean_Median_DF[name]
+        Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
+scaler_type = sp.StandardScaler()
+scale_data_df = Re_Molecule_DF
+scale_data_df = scale_data_df.drop("SMILES", axis=1)
+scale_data_df = scale_data_df.drop("ALDH1_inhibition", axis=1)
+scaler_type.fit(scale_data_df)
+scaled_data = scaler_type.transform(scale_data_df)
 
-print(Re_Molecule_DF)
+standard_scaled = pd.DataFrame(scaled_data, columns=scale_data_df.columns)
+
+standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"])
+standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
+
+#standard_scaled.set_index("SMILES")
+
+standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
