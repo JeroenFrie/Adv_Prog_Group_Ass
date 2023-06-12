@@ -12,11 +12,14 @@ In this file the possible neural networks are listed we can use for
 #%% MLP
 
 import pandas as pd
-import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import balanced_accuracy_score
+from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 #%%
 # Load in the data frame
 data = pd.read_csv('Descriptors_Vals_2D_3D.csv')
@@ -76,7 +79,6 @@ print("Balanced Accuracy:", balanced_acc)
 #TODO use sensitivity also
 
 #%% Random Forest
-from sklearn.ensemble import RandomForestClassifier
 
 rf_model = RandomForestClassifier(n_estimators=400)
 rf_model.fit(X_train, y_train)
@@ -84,3 +86,51 @@ rf_predictions = rf_model.predict(X_test)
 balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+#%% SVC
+
+svc_model = SVC(probability=True)
+svc_model.fit(X_train, y_train)
+svc_predictions = svc_model.predict(X_test)
+balanced_acc = balanced_accuracy_score(y_test, svc_predictions)
+print("Balanced Accuracy:", balanced_acc)
+
+#%% Logsitic regression
+
+ls_model = LogisticRegression(multi_class='multinomial', max_iter=1957)
+ls_model.fit(X_train, y_train)
+ls_predictions = ls_model.predict(X_test)
+balanced_acc = balanced_accuracy_score(y_test, ls_predictions)
+print("Balanced Accuracy:", balanced_acc)
+
+
+#%% Ensamble classifier
+
+
+# Create individual classifiers
+classifier1 = RandomForestClassifier(n_estimators=400)
+classifier2 = LogisticRegression(max_iter=2000)
+
+# Create the ensemble classifier using majority voting with probability estimation
+ensemble_classifier = VotingClassifier(
+    estimators=[('rfc', classifier1), ('sq', classifier2)],
+    voting='soft',  # Use 'soft' for weighted voting with predicted probabilities
+    flatten_transform=True,  # Enable probability estimation
+)
+
+# Train the ensemble classifier
+ensemble_classifier.fit(X_train, y_train)
+
+# Make probability predictions
+y_pred_prob = ensemble_classifier.predict_proba(X_test)
+
+# Convert probabilities to binary predictions
+y_pred_binary = ensemble_classifier.predict(X_test)  # Use `predict` instead of thresholding
+
+# Calculate balanced accuracy
+balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
+print("Balanced Accuracy:", balanced_acc)
+
+# does not work
+# loss, accuracy = ensemble_classifier.evaluate(X_test, y_test)
+# print("Validation Loss:", loss)
+# print("Validation Accuracy:", accuracy)
