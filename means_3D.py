@@ -66,6 +66,47 @@ def drieD_descriptors (num_conformers, mol):
         drieD_list.append(mean)  
     return drieD_list
 
+<<<<<<< HEAD
+non_inhibitor_value = []
+inhibitor_value =[]
+
+info = ({
+    'SMILES':[],
+    'ALDH1_inhibition' :[],
+    'Asphericity':[],
+    'Eccentricity':[],
+    'InertialShapeFactor':[],
+    'NPR1':[],
+    'NPR2':[],
+    'PMI1':[],
+    'PMI2':[],
+    'PMI3':[],
+    'RadiusOfGyration':[],
+    'SpherocityIndex':[]
+               })
+df_3d_descriptors  = pd.DataFrame(info)
+
+for index in range(len(data)):
+    mol = Chem.AddHs(Chem.MolFromSmiles(data["SMILES"][index])) #AddHs adds the hydrogen atoms
+   
+    #non inhibitor;
+    if data["ALDH1_inhibition"][index] == 0:     
+        # Make tuple with all 2d descriptors:
+        non_inhib_desc_values= calc.CalcDescriptors(mol)
+        
+        # Calculate 3d descriptors:
+        AllChem.EmbedMultipleConfs(mol, num_conformers)
+        driedee_list = drieD_descriptors(num_conformers, mol)        
+        
+        # Make tuple with all 3d descriptors
+        driedee_tuple = tuple(driedee_list)
+        # Add both tuples to non inhibotor list
+        non_inhibitor_value.append(non_inhib_desc_values + driedee_tuple)
+        
+        #Add 3D descriptor values to the 3D dataframe 
+        info_list = [data["SMILES"][index],0]+driedee_list
+        df_3d_descriptors.loc[len(df_3d_descriptors)] = info_list
+=======
 def Mean_median_desc(filepath):
     data = CSV_Loader(filepath)
     num_conformers = 20
@@ -94,6 +135,71 @@ def Mean_median_desc(filepath):
             # Make tuple with all 2d descriptors:
             non_inhib_desc_values= calc.CalcDescriptors(mol)
             
+<<<<<<< HEAD
+        # Make tuple with all 3d descriptors
+        driedee_tuple = tuple(driedee_list)
+        # Add both tuples to non inhibotor list
+        inhibitor_value.append(inhib_desc_values + driedee_tuple)
+        
+        #Add 3D descriptor values to the 3D dataframe 
+        info_list = [data["SMILES"][index],1]+driedee_list
+        df_3d_descriptors.loc[len(df_3d_descriptors)] = info_list
+
+# Calculate mean values        
+mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
+mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
+
+# Perform t-test per descriptor for means
+mean_ttest_results = []
+significant_count = 0 
+super_significant_count = 0
+for i, descriptor in enumerate(descriptor_names_all):
+    non_inhib_values = [desc[i] for desc in non_inhibitor_value]
+    inhib_values = [desc[i] for desc in inhibitor_value]
+    mean_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
+    mean_ttest_results.append(mean_ttest_result)
+    if mean_ttest_result.pvalue < 0.05:
+        significant_count += 1
+    if mean_ttest_result.pvalue < 0.01:
+        super_significant_count += 1
+
+# Calculate median values
+median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
+median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
+
+# Perform t-test per descriptor for medians
+median_ttest_results = []
+for i, descriptor in enumerate(descriptor_names_all):
+    non_inhib_values = [desc[i] for desc in non_inhibitor_value]
+    inhib_values = [desc[i] for desc in inhibitor_value]
+    median_ttest_result = stats.ttest_ind(non_inhib_values, inhib_values)
+    median_ttest_results.append(median_ttest_result)
+
+# Create a DataFrame with the mean, median, and descriptor names
+df = pd.DataFrame({'Descriptor': descriptor_names_all,
+                   'mean_non_inhibitors': mean_non_inhibitors,
+                   'mean_inhibitors': mean_inhibitors,
+                   'median_non_inhibitors': median_non_inhibitors,
+                   'median_inhibitors': median_inhibitors,
+                   'T-Statistic Mean': [result.statistic for result in mean_ttest_results],
+                   'p-value Mean': [result.pvalue for result in mean_ttest_results],
+                   'T-Statistic Median': [result.statistic for result in median_ttest_results],
+                   'p-value Median': [result.pvalue for result in median_ttest_results]})
+
+# Add significance columns
+df['Significance Mean'] = df['p-value Mean'].apply(lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
+df['p-value < 0.05 Count'] = significant_count
+df['Super_Significance Mean'] = df['p-value Mean'].apply(lambda p: 'woooooooooooooooooooooooooooooooooooooooooooooooow' if p < 0.01 else 'nope')
+df['p-value < 0.01 Count'] = super_significant_count
+df['Significance Median'] = df['p-value Median'].apply(lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
+
+# Lijstjes voor Jeroen:
+super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descriptor'].tolist()
+super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Descriptor'].tolist()
+
+df.to_csv('means_table_3D.csv', index=False)
+df_3d_descriptors.to_csv('3D_descriptor_values.csv',index=False)
+=======
             # Calculate 3d descriptors:
             AllChem.EmbedMultipleConfs(mol, num_conformers)
             driedee_list = drieD_descriptors (num_conformers, mol)        
