@@ -129,6 +129,10 @@ for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
+similarity_dataframe = CSV_Loader("similarity_data.csv")
+for i in range(3, 7):
+    Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
+
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
 scale_data_df = scale_data_df.drop("SMILES", axis=1)

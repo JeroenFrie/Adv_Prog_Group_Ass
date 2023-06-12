@@ -223,3 +223,6 @@ for i in range(len(Smiles_ref_inhibitor_insig_removed)):
 print(mean_median_similarity)
 # Save dataframe to csv file
 mean_median_similarity.to_csv("mean_median_similarity.csv")
+mol_data = mol_data.drop("Sim_inh3", axis=1)
+mol_data_revised = mol_data
+mol_data_revised.to_csv("similarity_data.csv")
