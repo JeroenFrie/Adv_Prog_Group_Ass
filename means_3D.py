@@ -82,6 +82,21 @@ def drieD_descriptors (num_conformers, mol):
 non_inhibitor_value = []
 inhibitor_value =[]
 
+info = ({
+    'SMILES':[],
+    'ALDH1_inhibition' :[],
+    'Asphericity':[],
+    'Eccentricity':[],
+    'InertialShapeFactor':[],
+    'NPR1':[],
+    'NPR2':[],
+    'PMI1':[],
+    'PMI2':[],
+    'PMI3':[],
+    'RadiusOfGyration':[],
+    'SpherocityIndex':[]
+               })
+df_3d_descriptors  = pd.DataFrame(info)
 
 for index in range(len(data)):
     mol = Chem.AddHs(Chem.MolFromSmiles(data["SMILES"][index])) #AddHs adds the hydrogen atoms
@@ -93,12 +108,16 @@ for index in range(len(data)):
         
         # Calculate 3d descriptors:
         AllChem.EmbedMultipleConfs(mol, num_conformers)
-        driedee_list = drieD_descriptors (num_conformers, mol)        
+        driedee_list = drieD_descriptors(num_conformers, mol)        
         
         # Make tuple with all 3d descriptors
         driedee_tuple = tuple(driedee_list)
         # Add both tuples to non inhibotor list
         non_inhibitor_value.append(non_inhib_desc_values + driedee_tuple)
+        
+        #Add 3D descriptor values to the 3D dataframe 
+        info_list = [data["SMILES"][index],0]+driedee_list
+        df_3d_descriptors.loc[len(df_3d_descriptors)] = info_list
     
     #inhibitor
     else:
@@ -113,6 +132,10 @@ for index in range(len(data)):
         driedee_tuple = tuple(driedee_list)
         # Add both tuples to non inhibotor list
         inhibitor_value.append(inhib_desc_values + driedee_tuple)
+        
+        #Add 3D descriptor values to the 3D dataframe 
+        info_list = [data["SMILES"][index],1]+driedee_list
+        df_3d_descriptors.loc[len(df_3d_descriptors)] = info_list
 
 # Calculate mean values        
 mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
@@ -167,4 +190,4 @@ super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descrip
 super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Descriptor'].tolist()
 
 df.to_csv('means_table_3D.csv', index=False)
-
+df_3d_descriptors.to_csv('3D_descriptor_values.csv',index=False)
