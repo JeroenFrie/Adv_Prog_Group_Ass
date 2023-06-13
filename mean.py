@@ -5,7 +5,7 @@ from CSV_Load import CSV_Loader
 from scipy import stats
 import pandas as pd
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #import seaborn as sns
 
 def Mean_Median_Desc(filepath):
@@ -113,6 +113,7 @@ def Mean_Median_Desc(filepath):
 
     # Write the descriptor values to a CSV file
    # significant_descriptor_values.to_csv('descriptor_values_boxplots_median.csv', index=False)
+
 
 
     return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
