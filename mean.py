@@ -6,7 +6,7 @@ from scipy import stats
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-#import seaborn as sns
+
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
@@ -68,8 +68,7 @@ def Mean_Median_Desc(filepath):
 
 
     # Lijstjes voor Jeroen:
-    super_significant_descriptors_mean_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
-    super_significant_descriptors_median_list = df[df['p-value'] < 0.01]['Descriptor'].tolist()
+    super_significant_descriptors = df[df['p-value'] < 0.01]['Descriptor'].tolist()
 
     df.to_csv('means_median_stat_table.csv', index=False)
 
@@ -78,44 +77,7 @@ def Mean_Median_Desc(filepath):
     df2 = df2[['Descriptor', 'mean_non_inhibitors','mean_inhibitors', 'median_non_inhibitors', 'median_inhibitors', 'p-value',]]
     df2.to_csv('descriptors_low_Pvalue.csv', index=False)
 
-    # Boxplots for mean
-    # Create a DataFrame with the descriptor values for significant descriptors
-   # significant_descriptor_values = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_mean_list})
-
-    # Create boxplots for the significant descriptors
- #   plt.figure(figsize=(12, 6))
- #   sns.boxplot(data=significant_descriptor_values)
- #   plt.xticks(rotation=90)
- #   plt.xlabel('Descriptor')
- #   plt.ylabel('Descriptor Value')
- #   plt.title('Boxplots for P<0.01 Mean')
- #   plt.tight_layout()
-
-    # Save the boxplots to a file
-  #  plt.savefig('boxplots_mean.png')
-
-    # Write the descriptor values to a CSV file
-  #  significant_descriptor_values.to_csv('descriptor_values_boxplots_mean.csv', index=False)
-
-    # Now for the median values
-  #  significant_descriptor_values_median = pd.DataFrame({desc: [desc_val[i] for desc_val in non_inhibitor_value + inhibitor_value] for i, desc in enumerate(descriptor_names) if desc in super_significant_descriptors_median_list})
-
-  #  plt.figure(figsize=(12, 6))
-  #  sns.boxplot(data=significant_descriptor_values_median)
-  #  plt.xticks(rotation=90)
-  #  plt.xlabel('Descriptor')
-  #  plt.ylabel('Descriptor Value')
-  #  plt.title('Boxplots for P<0.01 Median')
-  #  plt.tight_layout()
-
-    # Save the boxplots to a file
-  #  plt.savefig('boxplots_median.png')
-
-    # Write the descriptor values to a CSV file
-   # significant_descriptor_values.to_csv('descriptor_values_boxplots_median.csv', index=False)
-
-
-
-    return super_significant_descriptors_mean_list, super_significant_descriptors_median_list
+    return super_significant_descriptors
     
 Mean_Median_Desc('tested_molecules-1.csv')
+print(super_significant_descriptors)
