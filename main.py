@@ -83,31 +83,31 @@ refine_desc_corr = Inter_Corr(desc_corr_df)
 for name in refine_desc_corr:
     Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 
-#Desc_lists = Mean_Median_Desc("tested_molecules_v3.csv")
+Desc_lists = Mean_Median_Desc("tested_molecules_v3.csv")
 
-#Desc_Mean_list = Desc_lists[0]
-#Desc_Median_list = Desc_lists[1]
+Desc_Mean_list = Desc_lists[0]
+Desc_Median_list = Desc_lists[1]
 
-#Mean_Median_DF = Molecule_DF
-#desc_short_list = []
-#for name in short_desc:
- #   if name not in Desc_Mean_list:
-  #      Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
-   # else:
-    #    desc_short_list.append(name)
+Mean_Median_DF = Molecule_DF
+desc_short_list = []
+for name in short_desc:
+    if name not in Desc_Mean_list:
+        Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
+    else:
+        desc_short_list.append(name)
 
 
-#desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
-#Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
+desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
+Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
 
-#refine_mean_corr = Inter_Corr(Mean_Median_Corr)
+refine_mean_corr = Inter_Corr(Mean_Median_Corr)
 
-#for name in refine_mean_corr:
- #   desc_short_list.remove(name)
+for name in refine_mean_corr:
+    desc_short_list.remove(name)
 
-#for name in desc_short_list:
- #   if name not in Re_Molecule_DF.columns:
-  #      Re_Molecule_DF[name] = Mean_Median_DF[name]
+for name in desc_short_list:
+    if name not in Re_Molecule_DF.columns:
+        Re_Molecule_DF[name] = Mean_Median_DF[name]
 
 Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
 
@@ -129,6 +129,10 @@ for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
+similarity_dataframe = CSV_Loader("similarity_data.csv")
+for i in range(3, 7):
+    Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
+
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
 scale_data_df = scale_data_df.drop("SMILES", axis=1)
@@ -142,5 +146,6 @@ standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"]
 standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
 
 #standard_scaled.set_index("SMILES")
-
+print(standard_scaled)
+print(standard_scaled.columns)
 standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
