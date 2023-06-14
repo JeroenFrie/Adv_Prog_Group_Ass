@@ -104,8 +104,6 @@ print("Balanced Accuracy:", balanced_acc)
 
 
 #%% Ensamble classifier
-
-
 # Create individual classifiers
 classifier1 = RandomForestClassifier(n_estimators=400)
 classifier2 = LogisticRegression(max_iter=2000)
