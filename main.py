@@ -136,3 +136,7 @@ standard_scaled.set_index("SMILES")
 
 print(standard_scaled)
 standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+
+df = pd.DataFrame(desc_list, comumns = ['Descriptors'])
+
+df.to_csv('table_all_descriptors.csv', index=False)
