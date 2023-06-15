@@ -10,13 +10,6 @@ Molecules_DF = CSV_Loader("untested_molecules.csv")
 Descriptor_DF = CSV_Loader("Descriptors_Vals_2D_3D.csv")
 Similarity_Vals_DF = CSV_Loader("Similarity_val_un.csv")
 DrieD_DF = CSV_Loader("3D_descriptor_values_un.csv")
-print(DrieD_DF)
-None_Amount = 0
-for row in range(len(DrieD_DF)):
-    if DrieD_DF["PMI1"][row] == None:
-        None_Amount = None_Amount + 1
-print(None_Amount)
-
 
 Column_list = list(Descriptor_DF.columns)
 
@@ -38,13 +31,28 @@ for desc in ToD_Desc:
         temp_list.append(val_desc)
     Molecules_DF[desc] = temp_list
 
+Molecules_DF = pd.concat([Molecules_DF,DrieD_DF["PMI1"]], axis=1)
+
 for Sim in Similarity_Vals_DF.columns:
     if Sim not in Sim_Desc:
         Similarity_Vals_DF = Similarity_Vals_DF.drop(Sim, axis=1)
 
 all_col = Similarity_Vals_DF.iloc[:, :]
 Molecules_DF = pd.concat([Molecules_DF, all_col], axis=1)
-Molecules_DF = pd.concat([Molecules_DF,DrieD_DF["PMI1"]], axis=1)
-print(Molecules_DF)
-Molecules_DF.to_csv("Unknown_Mol_Desc.csv", index=False)
+
+
+scaler_type = sp.StandardScaler()
+Smiles_df = Molecules_DF["SMILES"]
+Molecules_DF = Molecules_DF.drop("SMILES", axis=1)
+
+scaler_type.fit(Molecules_DF)
+scaled_data = scaler_type.transform(Molecules_DF)
+
+standard_scaled = pd.DataFrame(scaled_data, columns=Molecules_DF.columns)
+
+standard_scaled.insert(0, "SMILES", Smiles_df["SMILES"])
+
+standard_scaled.set_index("SMILES")
+
+standard_scaled.to_csv("Unknown_Mol_Desc.csv", index=False)
 
