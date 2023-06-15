@@ -10,18 +10,18 @@ import scipy.stats as stats
 # Sim_inh0: "CN(C)C1=CC=C(C=C1)C=O": p-Dimethylaminobenzaldehyde hydrobromide    
 # Source for inhibitor: https://pubmed.ncbi.nlm.nih.gov/25512087/
 
-# Sim_inh2:"O=C1C=C2NCCC2=CC1=O": 5,6-Indolinedione
+# Sim_inh1:"O=C1C=C2NCCC2=CC1=O": 5,6-Indolinedione
 # Source for inhibitor: https://pubmed.ncbi.nlm.nih.gov/25512087/ 
 # (says indolinedione analogs are good ALDHA1 inhibitors)
 
-# Sim_inh3:"CC1=CC2=C(C=C1)NC(=O)C2=O": 5-methyl-1H-indole-2,3-dione             
+# Sim_inh2:"CC1=CC2=C(C=C1)NC(=O)C2=O": 5-methyl-1H-indole-2,3-dione             
 # Source for inhibitor: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3954746/
 
-# Sim_inh4:"C=CC(=O)C1=CC2=CC=CC=C2C=C1": 1-(2-Naphthalenyl)-2-propen-1-one  
+# Sim_inh3:"C=CC(=O)C1=CC2=CC=CC=C2C=C1": 1-(2-Naphthalenyl)-2-propen-1-one  
 # Source for inhibitor: (SID:26753168)
 # https://pubchem.ncbi.nlm.nih.gov/bioassay/1030#section=Data-Table 
     
-# Sim_inh5:"CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3CCN(CC3)C(=O)C4CC4": Nct-501
+# Sim_inh4:"CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3CCN(CC3)C(=O)C4CC4": Nct-501
 # Source for inhibitor: https://europepmc.org/article/pmc/5185321
 
 # List which contains the SMILES of the reference inhibitors 
@@ -194,19 +194,23 @@ print(ttest_moods_statistics.head())
 ttest_moods_statistics.to_csv("ttest_moods_statistics_similarity.csv")
 
 
+# Create separate dataframes for the inhibitors and non-inhibitors data
+mol_inh = mol_data[mol_data["ALDH1_inhibition"] == 1]
+mol_non_inh = mol_data[mol_data["ALDH1_inhibition"] == 0]
+
+print(mol_inh)
+
 
 # Only Sim_inh3 had insignificant differences in the ttest and moods test for
 # the median, for the other reference inhibitors a mean, median dataframe is 
 # created
 Smiles_ref_inhibitor_insig_removed = ["CN(C)C1=CC=C(C=C1)C=O", 
                                       "O=C1C=C2NCCC2=CC1=O", 
-                                      "CC1=CC2=C(C=C1)NC(=O)C2=O",
-                                      "CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3"+
-                                      "CCN(CC3)C(=O)C4CC4"]
+                                      "CC1=CC2=C(C=C1)NC(=O)C2=O",  
+                                      "CC(C)CCN1C(=NC2=C1C(=O)N(C(=O)N2C)C)CN3CCN(CC3)C(=O)C4CC4"]
+list_reference_insig_removed = ["Sim_inh0", "Sim_inh1", "Sim_inh2", "Sim_inh4"]
 
-# Create separate dataframes for the inhibitors and non-inhibitors data
-mol_inh = mol_data[mol_data["ALDH1_inhibition"] == 1]
-mol_non_inh = mol_data[mol_data["ALDH1_inhibition"] == 0]
+
 # Create a dataframe in which the means and medians of the similarity score
 # of reference inhibitors are stored, divided for the inhibitors and 
 # non-inhibitors
@@ -216,10 +220,11 @@ mean_median_similarity= pd.DataFrame(columns=
                                       "median_non_inh"])
 for i in range(len(Smiles_ref_inhibitor_insig_removed)):
         mean_median_similarity.loc[str(i)] = [Smiles_ref_inhibitor_insig_removed[i], 
-                                              mol_inh["Sim_inh"+str(i)].mean(), 
-                                               mol_non_inh["Sim_inh"+str(i)].mean(),
-                                               mol_inh["Sim_inh"+str(i)].median(),
-                                               mol_non_inh["Sim_inh"+str(i)].median()]
+                                              mol_inh[list_reference_insig_removed[i]].mean(), 
+                                               mol_non_inh[list_reference_insig_removed[i]].mean(),
+                                               mol_inh[list_reference_insig_removed[i]].median(),
+                                               mol_non_inh[list_reference_insig_removed[i]].median()]
 print(mean_median_similarity)
 # Save dataframe to csv file
 mean_median_similarity.to_csv("mean_median_similarity.csv")
+
