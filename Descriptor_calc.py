@@ -9,6 +9,14 @@ from sklearn import decomposition, linear_model
 Molecules_DF = CSV_Loader("untested_molecules.csv")
 Descriptor_DF = CSV_Loader("Descriptors_Vals_2D_3D.csv")
 Similarity_Vals_DF = CSV_Loader("Similarity_val_un.csv")
+DrieD_DF = CSV_Loader("3D_descriptor_values_un.csv")
+print(DrieD_DF)
+None_Amount = 0
+for row in range(len(DrieD_DF)):
+    if DrieD_DF["PMI1"][row] == None:
+        None_Amount = None_Amount + 1
+print(None_Amount)
+
 
 Column_list = list(Descriptor_DF.columns)
 
@@ -36,4 +44,7 @@ for Sim in Similarity_Vals_DF.columns:
 
 all_col = Similarity_Vals_DF.iloc[:, :]
 Molecules_DF = pd.concat([Molecules_DF, all_col], axis=1)
+Molecules_DF = pd.concat([Molecules_DF,DrieD_DF["PMI1"]], axis=1)
+print(Molecules_DF)
+Molecules_DF.to_csv("Unknown_Mol_Desc.csv", index=False)
 

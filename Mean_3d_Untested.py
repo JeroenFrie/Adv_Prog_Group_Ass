@@ -32,7 +32,7 @@ def drieD_descriptors(num_conformers, mol, smiles):
     drieD_descriptors_list = [PMI1s]
     drieD_list.append(smiles)
     for index in range(len(drieD_descriptors_list)):
-        if drieD_descriptors_list[index] != None:
+        if drieD_descriptors_list[index][0] != None:
             mean = sum(drieD_descriptors_list[index]) / num_conformers
             drieD_list.append(mean)
         else:
