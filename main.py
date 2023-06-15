@@ -1,7 +1,6 @@
 from rdkit.Chem import Descriptors
 from rdkit import Chem
 from rdkit.ML.Descriptors import MoleculeDescriptors
-from mean import Mean_Median_Desc
 import pandas as pd
 from CSV_Load import CSV_Loader
 import sklearn.preprocessing as sp
@@ -117,9 +116,9 @@ New_Index = list(range(len(similarity_dataframe)))
 
 similarity_dataframe["New_Index"] = New_Index
 
-similarity_dataframe = similarity_dataframe.set_index("New_Index")
-for i in range(3, 7):
-    Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
+#similarity_dataframe = similarity_dataframe.set_index("New_Index")
+#for i in range(3, 7):
+ #   Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
 
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
