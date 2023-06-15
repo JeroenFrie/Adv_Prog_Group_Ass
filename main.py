@@ -116,9 +116,9 @@ New_Index = list(range(len(similarity_dataframe)))
 
 similarity_dataframe["New_Index"] = New_Index
 
-#similarity_dataframe = similarity_dataframe.set_index("New_Index")
-#for i in range(3, 7):
- #   Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
+similarity_dataframe = similarity_dataframe.set_index("New_Index")
+for i in range(3, 7):
+    Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
 
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
@@ -132,7 +132,6 @@ standard_scaled = pd.DataFrame(scaled_data, columns=scale_data_df.columns)
 standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"])
 standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
 
-#standard_scaled.set_index("SMILES")
-print(standard_scaled)
-print(standard_scaled.columns)
+standard_scaled.set_index("SMILES")
+
 standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
