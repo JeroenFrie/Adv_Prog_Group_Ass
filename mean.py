@@ -68,6 +68,7 @@ def Mean_Median_Desc(filepath):
 
 
     # Lijstjes voor Jeroen:
+    significant_descriptors = df[df['p-value'] < 0.05]['Descriptor'].tolist()
     super_significant_descriptors = df[df['p-value'] < 0.01]['Descriptor'].tolist()
 
     df.to_csv('means_median_stat_table.csv', index=False)
@@ -77,7 +78,9 @@ def Mean_Median_Desc(filepath):
     df2 = df2[['Descriptor', 'mean_non_inhibitors','mean_inhibitors', 'median_non_inhibitors', 'median_inhibitors', 'p-value',]]
     df2.to_csv('descriptors_low_Pvalue.csv', index=False)
 
-    return super_significant_descriptors
+    return significant_descriptors, super_significant_descriptors
     
-Mean_Median_Desc('tested_molecules-1.csv')
-print(super_significant_descriptors)
+significant_descriptors, super_significant_descriptors = Mean_Median_Desc('tested_molecules_v2.csv')
+
+print(len(super_significant_descriptors))
+
