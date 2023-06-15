@@ -120,16 +120,6 @@ similarity_dataframe = similarity_dataframe.set_index("New_Index")
 for i in range(3, 7):
     Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
 
-Mean_List = list(CSV_Loader("descriptors_low_Pvalue_3D.csv")["Descriptor"])
-print(Mean_List)
-for descriptor in Re_Molecule_DF.columns:
-    if descriptor not in Mean_List and descriptor != "Sim_inh0" and descriptor != "Sim_inh1"\
-            and descriptor != "Sim_inh2" and descriptor != "Sim_inh4" and descriptor != "SMILES" and descriptor != "ALDH1_inhibition":
-        Re_Molecule_DF = Re_Molecule_DF.drop(descriptor, axis=1)
-
-
-
-
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
 scale_data_df = scale_data_df.drop("SMILES", axis=1)
