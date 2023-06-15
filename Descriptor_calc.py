@@ -42,7 +42,7 @@ Molecules_DF = pd.concat([Molecules_DF, all_col], axis=1)
 
 
 scaler_type = sp.StandardScaler()
-Smiles_df = Molecules_DF["SMILES"]
+Smiles_df = Molecules_DF
 Molecules_DF = Molecules_DF.drop("SMILES", axis=1)
 
 scaler_type.fit(Molecules_DF)
