@@ -12,7 +12,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 import sklearn.preprocessing as sp
 from CSV_Load import CSV_Loader
-from sklearn import decomposition
 
 #%% Preparing the data
 # load dataframe for training
@@ -20,9 +19,9 @@ known_molecules = CSV_Loader("Descriptors_Vals_2D_3D.csv")
 
 # Split its ass
 X = known_molecules.iloc[:, 2:]
-y = known_molecules.iloc[:, 1] 
+y = known_molecules.iloc[:, 1]
 
-# Scaling 
+# Scaling
 scaler_type = sp.StandardScaler()
 scaler_type.fit(X)
 
@@ -36,9 +35,6 @@ unknown = CSV_Loader("Unknown_Mol_Desc.csv")
 unknown_desc = unknown.iloc[:, 1:]
 
 #%% Train the whole data set with Logistic regression
-pca = decomposition.PCA(n_components=10)
-X_pca = pca.fit_transform(scaler_type.transform(X))
-
 # Create individual classifiers
 classifier1 = RandomForestClassifier(n_estimators=400)
 classifier2 = LogisticRegression(max_iter=2000)
@@ -69,9 +65,3 @@ top_100_df = output.head(100)
 
 # Save the top 100 rows to an Excel file
 top_100_df.to_excel('top_100_molecules.xlsx', index=False)
-print(top_100_df)
-
-
-
-
-
