@@ -5,29 +5,58 @@ from CSV_Load import CSV_Loader
 from scipy import stats
 import pandas as pd
 import numpy as np
+<<<<<<< HEAD
 import matplotlib.pyplot as plt
+
+=======
+
+#import matplotlib.pyplot as plt
+#import seaborn as sns
+>>>>>>> a13ea30601e82abf22fccc873aff4006451760e8
 
 
 def Mean_Median_Desc(filepath):
     data = CSV_Loader(filepath)
-
+    
     descriptor_names = [desc[0] for desc in Descriptors.descList]
     calc = MoleculeDescriptors.MolecularDescriptorCalculator(descriptor_names)
 
-    non_inhibitor_value = []
-    inhibitor_value = []
+    non_inhibitor_values = []
+    inhibitor_values = []
 
     for index in range(len(data)):
         mol = Chem.MolFromSmiles(data["SMILES"][index])
         if data["ALDH1_inhibition"][index] == 0:
             non_inhib_desc_values = calc.CalcDescriptors(mol)
-            non_inhibitor_value.append(non_inhib_desc_values)
+            non_inhibitor_values.append(non_inhib_desc_values)
         else:
             inhib_desc_values = calc.CalcDescriptors(mol)
-            inhibitor_value.append(inhib_desc_values)
+            inhibitor_values.append(inhib_desc_values)
+    
+    # Convert the lists of descriptor values to NumPy arrays
+    non_inhibitor_values = np.array(non_inhibitor_values)
+    inhibitor_values = np.array(inhibitor_values)
+    
+    # Calculate the z-scores for the molecules
+    non_inhibitor_z_scores = stats.zscore(non_inhibitor_values, axis=0)
+    inhibitor_z_scores = stats.zscore(inhibitor_values, axis=0)
+    
+    # Identify outlier molecules based on a threshold
+    threshold = 3
+    non_inhibitor_outliers = np.abs(non_inhibitor_z_scores) > threshold
+    inhibitor_outliers = np.abs(inhibitor_z_scores) > threshold
+      
+    # Replace outliers with 'nan'
+    non_inhibitor_values[non_inhibitor_outliers] = np.nan
+    inhibitor_values[inhibitor_outliers] = np.nan
 
-    mean_non_inhibitors = [sum(col) / len(col) for col in zip(*non_inhibitor_value)]
-    mean_inhibitors = [sum(col) / len(col) for col in zip(*inhibitor_value)]
+    # Calculate the mean
+    mean_non_inhibitors = np.nanmean(non_inhibitor_values, axis = 0)
+    mean_inhibitors = np.nanmean(inhibitor_values, axis = 0)
+    
+    # Calculate median 
+    median_non_inhibitors = np.nanmedian(non_inhibitor_values, axis =0)
+    median_inhibitors = np.nanmedian(inhibitor_values, axis = 0)
 
     # Perform t-test per descriptor
     ttest_results = []
@@ -35,18 +64,19 @@ def Mean_Median_Desc(filepath):
     super_significant_count = 0
 
     for i, descriptor in enumerate(descriptor_names):
-        non_inhibitor = [desc[i] for desc in non_inhibitor_value]
-        inhib_values = [desc[i] for desc in inhibitor_value]
-        ttest_result = stats.ttest_ind(non_inhibitor, inhib_values)
+        non_inhibitor = non_inhibitor_values [:,i]
+        inhibitor = inhibitor_values [:,i]
+        
+        #remove 'nan' values 
+        non_inhibitor_clean = non_inhibitor [~ np.isnan(non_inhibitor)]
+        inhibitor_clean = inhibitor [~ np.isnan(inhibitor)]
+        
+        ttest_result = stats.ttest_ind(non_inhibitor_clean, inhibitor_clean)
         ttest_results.append(ttest_result)
         if ttest_result.pvalue < 0.05:
             significant_count += 1
         if ttest_result.pvalue < 0.01:
             super_significant_count += 1
-
-    # Calculate median values
-    median_non_inhibitors = [np.median(col) for col in zip(*non_inhibitor_value)]
-    median_inhibitors = [np.median(col) for col in zip(*inhibitor_value)]
 
     
     # Create a DataFrame with the mean, median, and descriptor names
@@ -93,7 +123,11 @@ def Mean_Median_Desc(filepath):
 
     return significant_descriptors, super_significant_descriptors
     
+<<<<<<< HEAD
 significant_descriptors, super_significant_descriptors = Mean_Median_Desc('tested_molecules_v2.csv')
 
 print(len(super_significant_descriptors))
 
+=======
+Mean_Median_Desc('tested_molecules_v3.csv')
+>>>>>>> a13ea30601e82abf22fccc873aff4006451760e8
