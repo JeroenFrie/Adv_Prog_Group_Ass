@@ -29,11 +29,14 @@ def drieD_descriptors(num_conformers, mol, smiles):
             PMI1s.append(PMI1)
 
             # Calculate the mean per descriptor for the total number of conformations
-        drieD_descriptors_list = [PMI1s]
-        drieD_list.append(smiles)
-        for index in range(len(drieD_descriptors_list)):
+    drieD_descriptors_list = [PMI1s]
+    drieD_list.append(smiles)
+    for index in range(len(drieD_descriptors_list)):
+        if drieD_descriptors_list[index] != None:
             mean = sum(drieD_descriptors_list[index]) / num_conformers
             drieD_list.append(mean)
+        else:
+            drieD_list.append(drieD_descriptors_list[index])
 
     return drieD_list
 
