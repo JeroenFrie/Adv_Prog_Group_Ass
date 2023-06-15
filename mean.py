@@ -77,6 +77,19 @@ def Mean_Median_Desc(filepath):
     df2 = df [df['p-value']<0.01]
     df2 = df2[['Descriptor', 'mean_non_inhibitors','mean_inhibitors', 'median_non_inhibitors', 'median_inhibitors', 'p-value',]]
     df2.to_csv('descriptors_low_Pvalue.csv', index=False)
+ 
+    # figure for the report
+    fig,ax = plt.subplots()
+    ax.plot(df2['Descriptor'], df2['p-value'], marker = 'o', linestyle= '')
+
+    ax.set_xlabel('descriptors')
+    ax.set_ylabel('p-value')
+    ax.set_title('p-values plot')
+    plt.xticks(rotation=90)
+    plt.savefig('pvalue_plot.png')
+
+    # table for the report
+    df2.to_csv('p-value_table.csv', index=False)
 
     return significant_descriptors, super_significant_descriptors
     
