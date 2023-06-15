@@ -7,8 +7,13 @@ from CSV_Load import CSV_Loader
 import sklearn.preprocessing as sp
 from sklearn import decomposition, linear_model
 
-
 Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
+Molecule_DF = Molecule_DF.drop(index=909)
+New_Index = list(range(len(Molecule_DF)))
+
+Molecule_DF["New_Index"] = New_Index
+
+Molecule_DF = Molecule_DF.set_index("New_Index")
 
 DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
 
@@ -27,23 +32,24 @@ def Corr_Calc(Dataframe):
     for corr_mol in range(len(High_Corr)):
         row = High_Corr[corr_mol][0]
         index_corr_list.append(Dataframe.iloc[[row]].index[0])
-
     return index_corr_list
 
 def Inter_Corr(Dataframe):
     desc_high_corr = []
     column_name_list = []
-    for column_val in range(len(Dataframe.columns)):
-        column_name_list.append(Dataframe.columns[column_val])
-        for row in range(len(Dataframe)):
-            corr_val = Dataframe.iloc[row, column_val]
-            temp_list = []
-            if corr_val >= 0.9 and corr_val != 1 and Dataframe.iloc[[row]].index[0] not in \
-                    column_name_list or corr_val <= -0.9 and corr_val != 1 and Dataframe.iloc[[row]].index[0] not in \
-                    column_name_list:
-                temp_list.append(Dataframe.columns[column_val])
-                temp_list.append(Dataframe.iloc[[row]].index[0])
-                desc_high_corr.append(temp_list)
+    if len(Dataframe.columns) > 1:
+        for column_val in range(len(Dataframe.columns)):
+            column_name_list.append(Dataframe.columns[column_val])
+            for row in range(len(Dataframe)):
+                corr_val = Dataframe.iloc[row, column_val]
+                temp_list = []
+                if corr_val >= 0.9 and corr_val != 1 and Dataframe.iloc[[row]].index[0] not in \
+                        column_name_list or corr_val <= -0.9 and corr_val != 1 and Dataframe.iloc[[row]].index[0] not in \
+                        column_name_list:
+                    temp_list.append(Dataframe.columns[column_val])
+                    temp_list.append(Dataframe.iloc[[row]].index[0])
+                    desc_high_corr.append(temp_list)
+
 
     refine_mean_corr = []
     for desc_in in range(len(desc_high_corr)):
@@ -67,6 +73,7 @@ for desc in short_desc:
     Molecule_DF[desc] = temp_list
 
 Re_Molecule_DF = Molecule_DF
+
 Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
 index_corr_list = Corr_Calc(Corr_Mol_Des)
@@ -83,32 +90,6 @@ refine_desc_corr = Inter_Corr(desc_corr_df)
 for name in refine_desc_corr:
     Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 
-#Desc_lists = Mean_Median_Desc("tested_molecules_v3.csv")
-
-#Desc_Mean_list = Desc_lists[0]
-#Desc_Median_list = Desc_lists[1]
-
-#Mean_Median_DF = Molecule_DF
-#desc_short_list = []
-#for name in short_desc:
- #   if name not in Desc_Mean_list:
-  #      Mean_Median_DF = Mean_Median_DF.drop(name, axis=1)
-   # else:
-    #    desc_short_list.append(name)
-
-
-#desc_mean_df = Mean_Median_DF.iloc[:, 2:len(Mean_Median_DF.columns)]
-#Mean_Median_Corr = desc_mean_df.corr("spearman", numeric_only=True)
-
-#refine_mean_corr = Inter_Corr(Mean_Median_Corr)
-
-#for name in refine_mean_corr:
- #   desc_short_list.remove(name)
-
-#for name in desc_short_list:
- #   if name not in Re_Molecule_DF.columns:
-  #      Re_Molecule_DF[name] = Mean_Median_DF[name]
-
 Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
 
 DrieD_corr_index = Corr_Calc(Corr_Drie_D)
@@ -121,6 +102,7 @@ Column_Values = DrieD_Mol_DF.columns
 Pre_Inter_Corr = DrieD_Mol_DF.iloc[:, 2:len(DrieD_Mol_DF.columns)]
 
 Inter_Corr_Val = Inter_Corr(Pre_Inter_Corr)
+
 for name in Column_Values:
     if name in Inter_Corr_Val and name != "SMILES" and name != "ALDH1_inhibition":
         DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
@@ -128,6 +110,16 @@ for name in Column_Values:
 for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
+
+similarity_dataframe = CSV_Loader("similarity_data.csv")
+similarity_dataframe = similarity_dataframe.drop(index=909)
+New_Index = list(range(len(similarity_dataframe)))
+
+similarity_dataframe["New_Index"] = New_Index
+
+similarity_dataframe = similarity_dataframe.set_index("New_Index")
+for i in range(3, 7):
+    Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
 
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
@@ -141,7 +133,7 @@ standard_scaled = pd.DataFrame(scaled_data, columns=scale_data_df.columns)
 standard_scaled.insert(0, "ALDH1_inhibition", Re_Molecule_DF["ALDH1_inhibition"])
 standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
 
-standard_scaled.set_index("SMILES")
-
-standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+#standard_scaled.set_index("SMILES")
 print(standard_scaled)
+print(standard_scaled.columns)
+standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
