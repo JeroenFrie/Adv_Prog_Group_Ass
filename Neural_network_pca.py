@@ -116,6 +116,12 @@ rf_predictions = rf_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# Make predictions on the validation data
+y_pred = model.predict(X_pca_test)
+
+# Convert probabilities to binary predictions
+y_pred_binary = (y_pred > 0.5).astype(int)
+
 # calculate specifity
 tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
 specificity = tn / (tn+fp)
@@ -132,6 +138,12 @@ svc_predictions = svc_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, svc_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# Make predictions on the validation data
+y_pred = model.predict(X_pca_test)
+
+# Convert probabilities to binary predictions
+y_pred_binary = (y_pred > 0.5).astype(int)
+
 # calculate specifity
 tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
 specificity = tn / (tn+fp)
@@ -143,7 +155,7 @@ print("Sensitivity:", sensitivity)
 
 #%% Logsitic regression
 
-ls_model = LogisticRegression(multi_class='multinomial', max_iter=1957)
+ls_model = LogisticRegression(multi_class='multinomial', max_iter=2000)
 ls_model.fit(X_pca_train, y_train)
 ls_predictions = ls_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, ls_predictions)
@@ -157,10 +169,42 @@ print("Specificity:", specificity)
 # calculate sensitivity
 sensitivity = tp / (tp+fn)
 print("Sensitivity:", sensitivity)
+#%% Train the whole data set with Logistic regression
+pca = decomposition.PCA(n_components=10)
+X_pca = pca.fit_transform(scaler_type.transform(X))
+
+# Create individual classifiers
+classifier1 = RandomForestClassifier(n_estimators=400)
+classifier2 = LogisticRegression(max_iter=2000)
+
+# Create the ensemble classifier using majority voting with probability estimation
+ensemble_classifier = VotingClassifier(
+    estimators=[('rfc', classifier1), ('sq', classifier2)],
+    voting='soft',  # Use 'soft' for weighted voting with predicted probabilities
+    flatten_transform=True,  # Enable probability estimation
+)
+
+# Train the ensemble classifier
+ensemble_classifier.fit(X, y)
+
+# Make probability predictions
+y_pred_prob = ensemble_classifier.predict_proba(X)
+
+# Get the continuous output probabilities
+continuous_output = y_pred_prob[:, 1]
+
+output_linked = pd.DataFrame({'Molecule': df_PCA_B.iloc[:, 0], 'Continuous Output': continuous_output})
+# Sort the DataFrame based on the 'Continuous Output' column in descending order
+output = output_linked.sort_values(by='Continuous Output', ascending=False)
+
+# Select the top 100 rows
+top_100_df = output.head(100)
+
+# Save the top 100 rows to an Excel file
+top_100_df.to_excel('top_100_molecules.xlsx', index=False)
+print(top_100_df)
 
 #%% Ensamble classifier
-
-
 # Create individual classifiers
 classifier1 = RandomForestClassifier(n_estimators=400)
 classifier2 = LogisticRegression(max_iter=2000)
@@ -177,6 +221,9 @@ ensemble_classifier.fit(X_pca_train, y_train)
 
 # Make probability predictions
 y_pred_prob = ensemble_classifier.predict_proba(X_pca_test)
+
+# Get the continuous output probabilities
+continuous_output = y_pred_prob[:, 1]
 
 # Convert probabilities to binary predictions
 y_pred_binary = ensemble_classifier.predict(X_pca_test)  # Use `predict` instead of thresholding
