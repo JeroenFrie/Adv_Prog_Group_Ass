@@ -37,9 +37,9 @@ y = df_PCA_B.iloc[:, 1]
 
 # Scaling 
 scaler_type = sp.StandardScaler()
-scaler_type.fit(df_PCA_B)
+scaler_type.fit(X)
 
-# split dataset 
+# split dataset
 list_train_and_test = cross_validation_XY(X,y)
 X_sc_train = scaler_type.transform(list_train_and_test[1][0])
 X_sc_test = scaler_type.transform(list_train_and_test[1][1])
@@ -116,6 +116,14 @@ rf_predictions = rf_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
 #%% SVC
 
 svc_model = SVC(probability=True)
@@ -123,6 +131,15 @@ svc_model.fit(X_pca_train, y_train)
 svc_predictions = svc_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, svc_predictions)
 print("Balanced Accuracy:", balanced_acc)
+
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
 
 #%% Logsitic regression
 
@@ -132,6 +149,14 @@ ls_predictions = ls_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, ls_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
 
 #%% Ensamble classifier
 
