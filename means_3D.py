@@ -66,7 +66,7 @@ def drieD_descriptors (num_conformers, mol):
         drieD_list.append(mean)  
     return drieD_list
 
-<<<<<<< HEAD
+
 non_inhibitor_value = []
 inhibitor_value =[]
 
@@ -106,7 +106,7 @@ for index in range(len(data)):
         #Add 3D descriptor values to the 3D dataframe 
         info_list = [data["SMILES"][index],0]+driedee_list
         df_3d_descriptors.loc[len(df_3d_descriptors)] = info_list
-=======
+
 def Mean_median_desc(filepath):
     data = CSV_Loader(filepath)
     num_conformers = 20
@@ -135,7 +135,7 @@ def Mean_median_desc(filepath):
             # Make tuple with all 2d descriptors:
             non_inhib_desc_values= calc.CalcDescriptors(mol)
             
-<<<<<<< HEAD
+
         # Make tuple with all 3d descriptors
         driedee_tuple = tuple(driedee_list)
         # Add both tuples to non inhibotor list
@@ -199,7 +199,7 @@ super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Des
 
 df.to_csv('means_table_3D.csv', index=False)
 df_3d_descriptors.to_csv('3D_descriptor_values.csv',index=False)
-=======
+
             # Calculate 3d descriptors:
             AllChem.EmbedMultipleConfs(mol, num_conformers)
             driedee_list = drieD_descriptors (num_conformers, mol)        
