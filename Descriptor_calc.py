@@ -8,6 +8,7 @@ from sklearn import decomposition, linear_model
 
 Molecules_DF = CSV_Loader("untested_molecules.csv")
 Descriptor_DF = CSV_Loader("Descriptors_Vals_2D_3D.csv")
+Similarity_Vals_DF = CSV_Loader("Similarity_val_un.csv")
 
 Column_list = list(Descriptor_DF.columns)
 
@@ -15,6 +16,7 @@ for i in range(2):
     Column_list.pop(0)
 
 ToD_Desc = Column_list[0:Column_list.index("PMI1")]
+Sim_Desc = Column_list[Column_list.index("PMI1")+1:len(Column_list)]
 
 Mol_list = []
 for row in range(len(Molecules_DF)):
@@ -27,4 +29,11 @@ for desc in ToD_Desc:
         val_desc = calc.CalcDescriptors(MOL)[0]
         temp_list.append(val_desc)
     Molecules_DF[desc] = temp_list
+
+for Sim in Similarity_Vals_DF.columns:
+    if Sim not in Sim_Desc:
+        Similarity_Vals_DF = Similarity_Vals_DF.drop(Sim, axis=1)
+
+all_col = Similarity_Vals_DF.iloc[:, :]
+Molecules_DF = pd.concat([Molecules_DF, all_col], axis=1)
 

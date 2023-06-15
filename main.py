@@ -61,9 +61,9 @@ for row in range(len(Molecule_DF)):
     Mol_list.append(Chem.MolFromSmiles(Molecule_DF["SMILES"][row]))
 
 desc_list = [n[0] for n in Descriptors._descList]
-short_desc = [i for i in desc_list if not i.startswith("fr_")]
+#short_desc = [i for i in desc_list if not i.startswith("fr_")]
 
-for desc in short_desc:
+for desc in desc_list:
     temp_list = []
     calc = MoleculeDescriptors.MolecularDescriptorCalculator([desc])
     for MOL in Mol_list:
@@ -77,7 +77,7 @@ Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
 index_corr_list = Corr_Calc(Corr_Mol_Des)
 
-for name in short_desc:
+for name in desc_list:
     if name not in index_corr_list:
         Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 

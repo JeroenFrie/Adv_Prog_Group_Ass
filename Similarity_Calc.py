@@ -64,4 +64,4 @@ for nr_ref in range(len(reference_inhibitor_fps)):
     # Add the tanimoto list to a new column in the mol_data data frame
     mol_data["Sim_inh"+str(nr_ref)] = tanimoto
 
-print(mol_data)
+mol_data.to_csv("Similarity_val_un.csv", index=False)
