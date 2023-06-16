@@ -6,6 +6,7 @@ from CSV_Load import CSV_Loader
 import sklearn.preprocessing as sp
 from sklearn import decomposition, linear_model
 
+# Loading in all CSV files and removing faulty index
 Molecule_DF = CSV_Loader("tested_molecules_v3.csv")
 Molecule_DF = Molecule_DF.drop(index=909)
 New_Index = list(range(len(Molecule_DF)))
@@ -16,8 +17,26 @@ Molecule_DF = Molecule_DF.set_index("New_Index")
 
 DrieD_Mol_DF = CSV_Loader("3D_descriptor_values.csv")
 
+similarity_dataframe = CSV_Loader("similarity_data.csv")
+
+similarity_dataframe = similarity_dataframe.drop(index=909)
+New_Index = list(range(len(similarity_dataframe)))
+
+similarity_dataframe["New_Index"] = New_Index
+
+similarity_dataframe = similarity_dataframe.set_index("New_Index")
 
 def Corr_Calc(Dataframe):
+    """Function to see which variables have a high enough correlation
+            ----------
+            Dataframe : Dataframe
+                Dataframe containing multiple columns and rows
+
+            Returns
+            -------
+            index_corr_list : list
+                list containing indices of all highly correlated variables
+        """
     High_Corr = []
     for row in range(len(Dataframe)):
         temp_list = []
@@ -34,6 +53,16 @@ def Corr_Calc(Dataframe):
     return index_corr_list
 
 def Inter_Corr(Dataframe):
+    """Function to calculate the correlation between variables
+               ----------
+               Dataframe : Dataframe
+                   Dataframe containing multiple columns and rows
+
+               Returns
+               -------
+               refine_mean_corr : list
+                   list containing indices of all highly correlated variables
+           """
     desc_high_corr = []
     column_name_list = []
     if len(Dataframe.columns) > 1:
@@ -56,13 +85,17 @@ def Inter_Corr(Dataframe):
             refine_mean_corr.append(desc_high_corr[desc_in][0])
     return refine_mean_corr
 
+
+# Code to convert all of the SMILES to molecules
 Mol_list = []
 for row in range(len(Molecule_DF)):
     Mol_list.append(Chem.MolFromSmiles(Molecule_DF["SMILES"][row]))
 
+# Creating list containing all 2D descriptors
 desc_list = [n[0] for n in Descriptors._descList]
-#short_desc = [i for i in desc_list if not i.startswith("fr_")]
 
+
+# Calculating all of the 2D descriptors for the given molecules and adding these to the dataframe
 for desc in desc_list:
     temp_list = []
     calc = MoleculeDescriptors.MolecularDescriptorCalculator([desc])
@@ -73,10 +106,13 @@ for desc in desc_list:
 
 Re_Molecule_DF = Molecule_DF
 
+
+# Calculating the correlation matrix for the dataframe
 Corr_Mol_Des = Molecule_DF.corr("spearman", numeric_only=True)
 
 index_corr_list = Corr_Calc(Corr_Mol_Des)
 
+# Removing all low correlating variables
 for name in desc_list:
     if name not in index_corr_list:
         Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
@@ -84,8 +120,10 @@ for name in desc_list:
 desc_df = Re_Molecule_DF.iloc[:, 2:len(Re_Molecule_DF.columns)]
 desc_corr_df = desc_df.corr("spearman", numeric_only=True)
 
+# Checking whether the variables have high correlation with eachother
 refine_desc_corr = Inter_Corr(desc_corr_df)
 
+# Removing all highly correlating variables
 for name in refine_desc_corr:
     Re_Molecule_DF = Re_Molecule_DF.drop(name, axis=1)
 
@@ -93,6 +131,7 @@ Corr_Drie_D = DrieD_Mol_DF.corr("spearman",numeric_only=True)
 
 DrieD_corr_index = Corr_Calc(Corr_Drie_D)
 
+# Removing all low correlating variables
 for name in DrieD_Mol_DF.columns:
     if name not in DrieD_corr_index and name != "SMILES" and name != "ALDH1_inhibition":
         DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
@@ -101,25 +140,21 @@ Column_Values = DrieD_Mol_DF.columns
 Pre_Inter_Corr = DrieD_Mol_DF.iloc[:, 2:len(DrieD_Mol_DF.columns)]
 
 Inter_Corr_Val = Inter_Corr(Pre_Inter_Corr)
-
+# Removing all highly correlated variables
 for name in Column_Values:
     if name in Inter_Corr_Val and name != "SMILES" and name != "ALDH1_inhibition":
         DrieD_Mol_DF = DrieD_Mol_DF.drop(name, axis=1)
 
+# Adding the remaining 3D descriptors to the main dataframe
 for name in DrieD_Mol_DF.columns:
     if name not in Re_Molecule_DF.columns:
         Re_Molecule_DF[name] = DrieD_Mol_DF[name]
 
-similarity_dataframe = CSV_Loader("similarity_data.csv")
-similarity_dataframe = similarity_dataframe.drop(index=909)
-New_Index = list(range(len(similarity_dataframe)))
-
-similarity_dataframe["New_Index"] = New_Index
-
-similarity_dataframe = similarity_dataframe.set_index("New_Index")
+# Adding in the similarity values from the similarity csv file
 for i in range(3, 7):
     Re_Molecule_DF = pd.concat([Re_Molecule_DF, similarity_dataframe.iloc[:, i]], axis=1)
 
+# Scaling the dataframe with a standard scaling
 scaler_type = sp.StandardScaler()
 scale_data_df = Re_Molecule_DF
 scale_data_df = scale_data_df.drop("SMILES", axis=1)
@@ -134,8 +169,11 @@ standard_scaled.insert(0, "SMILES", Re_Molecule_DF["SMILES"])
 
 standard_scaled.set_index("SMILES")
 
-print(standard_scaled)
+# Exporting the csv
+
 standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
+
+# Making a table of the main dataframe
 
 df = pd.DataFrame(desc_list, comumns = ['Descriptors'])
 
