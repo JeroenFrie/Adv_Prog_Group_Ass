@@ -5,14 +5,8 @@ from CSV_Load import CSV_Loader
 from scipy import stats
 import pandas as pd
 import numpy as np
-<<<<<<< HEAD
 import matplotlib.pyplot as plt
 
-=======
-
-#import matplotlib.pyplot as plt
-#import seaborn as sns
->>>>>>> a13ea30601e82abf22fccc873aff4006451760e8
 
 
 def Mean_Median_Desc(filepath):
@@ -123,11 +117,7 @@ def Mean_Median_Desc(filepath):
 
     return significant_descriptors, super_significant_descriptors
     
-<<<<<<< HEAD
 significant_descriptors, super_significant_descriptors = Mean_Median_Desc('tested_molecules_v2.csv')
 
 print(len(super_significant_descriptors))
 
-=======
-Mean_Median_Desc('tested_molecules_v3.csv')
->>>>>>> a13ea30601e82abf22fccc873aff4006451760e8
