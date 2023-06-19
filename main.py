@@ -178,3 +178,10 @@ standard_scaled.to_csv("Descriptors_Vals_2D_3D.csv", index=False)
 df = pd.DataFrame(desc_list, comumns = ['Descriptors'])
 
 df.to_csv('table_all_descriptors.csv', index=False)
+
+# Make table with all used descriptors
+column_names = standard_scaled.columns.tolist()
+df = pd.DataFrame({'Descriptors': column_names})
+df = df.iloc[2:] 
+print(df)
+df.to_csv('table_all_descriptors.csv', index=False)
