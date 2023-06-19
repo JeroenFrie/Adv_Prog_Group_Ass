@@ -41,6 +41,7 @@ def smiles_to_fingerprint(smiles: str) -> rdkit:
         fp: rdkit.datastruct in which the bit information of a molecular
             fingerprint is stored
      """
+    # source: https://www.rdkit.org/docs/GettingStartedInPython.html
     try:
         # Get the molecular object from the smiles string
         mol = Chem.MolFromSmiles(smiles)

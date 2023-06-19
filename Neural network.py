@@ -72,12 +72,6 @@ y_pred_binary = (y_pred > 0.5).astype(int)
 # Calculate balanced accuracy
 balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
 print("Balanced Accuracy:", balanced_acc)
-
-
-#TODO comparative method for true value and predicted value (RMES)
-#TODO retrain on all the data
-#TODO use sensitivity also
-
 #%% Random Forest
 
 rf_model = RandomForestClassifier(n_estimators=400)
@@ -127,8 +121,3 @@ y_pred_binary = ensemble_classifier.predict(X_test)  # Use `predict` instead of 
 # Calculate balanced accuracy
 balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
 print("Balanced Accuracy:", balanced_acc)
-
-# does not work
-# loss, accuracy = ensemble_classifier.evaluate(X_test, y_test)
-# print("Validation Loss:", loss)
-# print("Validation Accuracy:", accuracy)
