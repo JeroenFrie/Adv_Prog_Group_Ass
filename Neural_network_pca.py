@@ -10,8 +10,6 @@ In this file the possible neural networks are listed we can use for
             determining whether a inhibitor actually inhibits ALDH1
 """
 #%% MLP
-
-import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense
 from sklearn.model_selection import train_test_split
@@ -29,8 +27,6 @@ from sklearn import decomposition, linear_model
 #%%
 # load dataframe
 df_PCA_B = CSV_Loader("Descriptors_Vals_2D_3D.csv")
-#df_PCA_B = df_PCA_B.drop("SMILES", axis=1)
-#df_PCA_B = df_PCA_B.drop("ALDH1_inhibition", axis=1)
 
 X = df_PCA_B.iloc[:, 2:]
 y = df_PCA_B.iloc[:, 1] 
@@ -64,7 +60,7 @@ input_dim = X.shape[1]
 #Splitting data in training and validation set
 #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-#%%Run this part for the actual model
+#%% A sequential model
 # Create a Sequential model
 model = Sequential()
 
@@ -104,7 +100,6 @@ balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
 print("Balanced Accuracy:", balanced_acc)
 
 #%% Random Forest
-
 rf_model = RandomForestClassifier(n_estimators=400)
 rf_model.fit(X_pca_train, y_train)
 rf_predictions = rf_model.predict(X_pca_test)
@@ -126,7 +121,6 @@ print("Specificity:", specificity)
 sensitivity = tp / (tp+fn)
 print("Sensitivity:", sensitivity)
 #%% SVC
-
 svc_model = SVC(probability=True)
 svc_model.fit(X_pca_train, y_train)
 svc_predictions = svc_model.predict(X_pca_test)
