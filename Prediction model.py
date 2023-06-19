@@ -4,7 +4,7 @@ Created on Thu Jun 15 20:27:09 2023
 
 @author: 20201969
 """
-# Import shizzle
+# Import packages
 
 import pandas as pd
 from sklearn.ensemble import VotingClassifier
