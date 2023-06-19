@@ -90,11 +90,6 @@ def Mean_Median_Desc(filepath):
         lambda p: 'woow' if p < 0.01 else 'nope')
     df['p-value < 0.01 Count'] = super_significant_count
 
-
-    # Lijstjes voor Jeroen:
-    significant_descriptors = df[df['p-value'] < 0.05]['Descriptor'].tolist()
-    super_significant_descriptors = df[df['p-value'] < 0.01]['Descriptor'].tolist()
-
     df.to_csv('means_median_stat_table.csv', index=False)
 
     # make second table with only the descriptors with significant difference 
@@ -102,22 +97,9 @@ def Mean_Median_Desc(filepath):
     df2 = df2[['Descriptor', 'mean_non_inhibitors','mean_inhibitors', 'median_non_inhibitors', 'median_inhibitors', 'p-value',]]
     df2.to_csv('descriptors_low_Pvalue.csv', index=False)
  
-    # figure for the report
-    fig,ax = plt.subplots()
-    ax.plot(df2['Descriptor'], df2['p-value'], marker = 'o', linestyle= '')
-
-    ax.set_xlabel('descriptors')
-    ax.set_ylabel('p-value')
-    ax.set_title('p-values plot')
-    plt.xticks(rotation=90)
-    plt.savefig('pvalue_plot.png')
-
-    # table for the report
-    df2.to_csv('p-value_table.csv', index=False)
 
     return significant_descriptors, super_significant_descriptors
     
 significant_descriptors, super_significant_descriptors = Mean_Median_Desc('tested_molecules_v2.csv')
 
-print(len(super_significant_descriptors))
 
