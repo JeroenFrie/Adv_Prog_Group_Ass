@@ -185,9 +185,5 @@ df['Super_Significance Mean'] = df['p-value Mean'].apply(lambda p: 'wooooooooooo
 df['p-value < 0.01 Count'] = super_significant_count
 df['Significance Median'] = df['p-value Median'].apply(lambda p: 'jaaaaaaaaaaaaa, goed verschilletje hiero' if p < 0.05 else 'nope, deze niet')
 
-# Lijstjes voor Jeroen:
-super_significant_descriptors_mean_list = df[df['p-value Mean'] < 0.01]['Descriptor'].tolist()
-super_significant_descriptors_median_list = df[df['p-value Median'] < 0.01]['Descriptor'].tolist()
-
 df.to_csv('means_table_3D.csv', index=False)
 df_3d_descriptors.to_csv('3D_descriptor_values.csv',index=False)
