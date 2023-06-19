@@ -37,9 +37,9 @@ y = df_PCA_B.iloc[:, 1]
 
 # Scaling 
 scaler_type = sp.StandardScaler()
-scaler_type.fit(df_PCA_B)
+scaler_type.fit(X)
 
-# split dataset 
+# split dataset
 list_train_and_test = cross_validation_XY(X,y)
 X_sc_train = scaler_type.transform(list_train_and_test[1][0])
 X_sc_test = scaler_type.transform(list_train_and_test[1][1])
@@ -103,11 +103,6 @@ y_pred_binary = (y_pred > 0.5).astype(int)
 balanced_acc = balanced_accuracy_score(y_test, y_pred_binary)
 print("Balanced Accuracy:", balanced_acc)
 
-
-#TODO comparative method for true value and predicted value (RMES)
-#TODO retrain on all the data
-#TODO use sensitivity also
-
 #%% Random Forest
 
 rf_model = RandomForestClassifier(n_estimators=400)
@@ -116,6 +111,20 @@ rf_predictions = rf_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, rf_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# Make predictions on the validation data
+y_pred = model.predict(X_pca_test)
+
+# Convert probabilities to binary predictions
+y_pred_binary = (y_pred > 0.5).astype(int)
+
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
 #%% SVC
 
 svc_model = SVC(probability=True)
@@ -124,18 +133,39 @@ svc_predictions = svc_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, svc_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# Make predictions on the validation data
+y_pred = model.predict(X_pca_test)
+
+# Convert probabilities to binary predictions
+y_pred_binary = (y_pred > 0.5).astype(int)
+
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
+
 #%% Logsitic regression
 
-ls_model = LogisticRegression(multi_class='multinomial', max_iter=1957)
+ls_model = LogisticRegression(multi_class='multinomial', max_iter=2000)
 ls_model.fit(X_pca_train, y_train)
 ls_predictions = ls_model.predict(X_pca_test)
 balanced_acc = balanced_accuracy_score(y_test, ls_predictions)
 print("Balanced Accuracy:", balanced_acc)
 
+# calculate specifity
+tn, fp, fn, tp = confusion_matrix(y_test, y_pred_binary).ravel()
+specificity = tn / (tn+fp)
+print("Specificity:", specificity)
+
+# calculate sensitivity
+sensitivity = tp / (tp+fn)
+print("Sensitivity:", sensitivity)
 
 #%% Ensamble classifier
-
-
 # Create individual classifiers
 classifier1 = RandomForestClassifier(n_estimators=400)
 classifier2 = LogisticRegression(max_iter=2000)
@@ -153,6 +183,9 @@ ensemble_classifier.fit(X_pca_train, y_train)
 # Make probability predictions
 y_pred_prob = ensemble_classifier.predict_proba(X_pca_test)
 
+# Get the continuous output probabilities
+continuous_output = y_pred_prob[:, 1]
+
 # Convert probabilities to binary predictions
 y_pred_binary = ensemble_classifier.predict(X_pca_test)  # Use `predict` instead of thresholding
 
@@ -168,7 +201,3 @@ print("Specificity:", specificity)
 # calculate sensitivity
 sensitivity = tp / (tp+fn)
 print("Sensitivity:", sensitivity)
-# does not work
-# loss, accuracy = ensemble_classifier.evaluate(X_test, y_test)
-# print("Validation Loss:", loss)
-# print("Validation Accuracy:", accuracy)
